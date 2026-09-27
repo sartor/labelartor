@@ -1,6 +1,5 @@
 <script setup lang="ts">
 /** Saved queues. Clicking one selects it and offers to load it into the queue. */
-import { IconDownload, IconPencil, IconTrash, IconUpload } from '@tabler/icons-vue'
 import { computed, ref } from 'vue'
 
 import AppIcon from '@/components/ui/AppIcon.vue'
@@ -9,6 +8,7 @@ import CollapsibleCard from '@/components/ui/CollapsibleCard.vue'
 import { useBackup } from '@/composables/useBackup'
 import { useOpenInEditor } from '@/composables/useOpenInEditor'
 import type { Project } from '@/core/label'
+import { IconDownload, IconPencil, IconTrash, IconUpload } from '@/icons'
 import { useLabelStore } from '@/stores/label'
 import { useProjectsStore } from '@/stores/projects'
 import { useQueueStore } from '@/stores/queue'
@@ -89,7 +89,7 @@ async function onFileChosen(event: Event) {
           title="Save the selected project to a file"
           @click="exportProject(selected)"
         >
-          <AppIcon :icon="IconDownload" :size="16" class="me-1" />Export
+          <AppIcon :icon="IconDownload" class="me-1" />Export
         </button>
         <button
           type="button"
@@ -97,7 +97,7 @@ async function onFileChosen(event: Event) {
           title="Rename the selected project"
           @click="rename(selected)"
         >
-          <AppIcon :icon="IconPencil" :size="16" class="me-1" />Rename
+          <AppIcon :icon="IconPencil" class="me-1" />Rename
         </button>
         <button
           type="button"
@@ -105,7 +105,7 @@ async function onFileChosen(event: Event) {
           title="Delete the selected project"
           @click="remove(selected)"
         >
-          <AppIcon :icon="IconTrash" :size="16" class="me-1" />Delete
+          <AppIcon :icon="IconTrash" class="me-1" />Delete
         </button>
         <span class="input-group-text">{{ labelsOf(selected) }}</span>
       </div>
@@ -115,7 +115,7 @@ async function onFileChosen(event: Event) {
         title="Add a project from a file"
         @click="fileInput?.click()"
       >
-        <AppIcon :icon="IconUpload" :size="16" class="me-1" />Import project…
+        <AppIcon :icon="IconUpload" class="me-1" />Import project…
       </button>
       <input
         ref="fileInput"

@@ -42,7 +42,8 @@ export const BUNDLED_FONTS: readonly FontOption[] = [
   { family: 'Unifont', label: 'Unifont', group: 'pixel', regularOnly: true },
 ]
 
-export const DEFAULT_FONT_FAMILY = BUNDLED_FONTS[0]!.family
+/** Also the fallback for drafts naming a font the app no longer ships. */
+export const DEFAULT_FONT_FAMILY = 'Handjet Variable'
 
 export interface FontGroupOptions {
   id: FontGroup

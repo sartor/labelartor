@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { IconTypography } from '@tabler/icons-vue'
 import { useId } from 'vue'
 
 import AppIcon from '@/components/ui/AppIcon.vue'
 import { BUNDLED_FONT_GROUPS } from '@/core/fonts'
+import { IconTypography } from '@/icons'
 
 const model = defineModel<string>({ required: true })
 const id = useId()

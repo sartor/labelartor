@@ -3,11 +3,11 @@
  * Font size in dots. The largest value is what fits the tape ("auto", stored
  * as 0 so it keeps following the text); the smallest is a share of it.
  */
-import { IconTextSize } from '@tabler/icons-vue'
 import { computed } from 'vue'
 
 import NumberField from '@/components/ui/NumberField.vue'
 import { clampFontSize, minFontSize } from '@/core/label'
+import { IconTextSize } from '@/icons'
 
 const props = defineProps<{
   /** Largest size that fits the tape for the current text. */

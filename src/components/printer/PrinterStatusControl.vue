@@ -5,31 +5,32 @@
  * Its colour and label follow the app status (busy, ready, error…), and the
  * details of the last error are printed right after it.
  */
-import {
-  IconAlertOctagonFilled,
-  IconAlertTriangleFilled,
-  IconBluetooth,
-  IconCircleCheckFilled,
-  IconCircleX,
-  IconRefresh,
-} from '@tabler/icons-vue'
-import { computed, type Component } from 'vue'
+import { computed } from 'vue'
 
 import PrinterStatusMenuItems from '@/components/printer/PrinterStatusMenuItems.vue'
 import AppDropdown from '@/components/ui/AppDropdown.vue'
 import AppIcon from '@/components/ui/AppIcon.vue'
 import { useAppStatus, type StatusTone } from '@/composables/useAppStatus'
+import {
+  IconAlertOctagon,
+  IconAlertTriangle,
+  IconBluetooth,
+  IconCircleCheck,
+  IconCircleX,
+  IconRefresh,
+  type IconPath,
+} from '@/icons'
 import { usePrinterStore } from '@/stores/printer'
 
 const printer = usePrinterStore()
 const status = useAppStatus()
 
-const tones: Record<StatusTone, { variant: string; icon: Component | null }> = {
+const tones: Record<StatusTone, { variant: string; icon: IconPath | null }> = {
   busy: { variant: 'btn-outline-primary', icon: null },
-  ok: { variant: 'btn-outline-success', icon: IconCircleCheckFilled },
+  ok: { variant: 'btn-outline-success', icon: IconCircleCheck },
   idle: { variant: 'btn-outline-primary', icon: IconBluetooth },
-  warning: { variant: 'btn-outline-warning', icon: IconAlertTriangleFilled },
-  danger: { variant: 'btn-outline-danger', icon: IconAlertOctagonFilled },
+  warning: { variant: 'btn-outline-warning', icon: IconAlertTriangle },
+  danger: { variant: 'btn-outline-danger', icon: IconAlertOctagon },
 }
 
 const tone = computed(() => tones[status.value.tone])
@@ -56,7 +57,7 @@ const title = computed(
 
   <span v-if="!printer.supported" class="d-inline-block" :title="status.detail">
     <button type="button" class="btn btn-sm btn-outline-warning" disabled>
-      <AppIcon v-if="tone.icon" :icon="tone.icon" :size="16" class="me-1" />{{ status.text }}
+      <AppIcon v-if="tone.icon" :icon="tone.icon" class="me-1" />{{ status.text }}
     </button>
   </span>
 
@@ -68,7 +69,7 @@ const title = computed(
   >
     <template #toggle>
       <span v-if="busy" class="spinner-border spinner-border-sm me-1" aria-hidden="true" />
-      <AppIcon v-else-if="tone.icon" :icon="tone.icon" :size="16" class="me-1" />{{ label }}
+      <AppIcon v-else-if="tone.icon" :icon="tone.icon" class="me-1" />{{ label }}
     </template>
     <PrinterStatusMenuItems :status-text="status.text" />
     <li><hr class="dropdown-divider" /></li>
@@ -79,12 +80,12 @@ const title = computed(
         :disabled="printer.activity !== 'idle'"
         @click="printer.refreshStatus()"
       >
-        <AppIcon :icon="IconRefresh" :size="16" class="me-2" />Refresh status
+        <AppIcon :icon="IconRefresh" class="me-2" />Refresh status
       </button>
     </li>
     <li>
       <button type="button" class="dropdown-item text-danger" @click="printer.disconnect()">
-        <AppIcon :icon="IconCircleX" :size="16" class="me-2" />Disconnect
+        <AppIcon :icon="IconCircleX" class="me-2" />Disconnect
       </button>
     </li>
   </AppDropdown>
@@ -99,7 +100,7 @@ const title = computed(
     @click="printer.connect()"
   >
     <span v-if="busy" class="spinner-border spinner-border-sm me-1" aria-hidden="true" />
-    <AppIcon v-else-if="tone.icon" :icon="tone.icon" :size="16" class="me-1" />{{ label }}
+    <AppIcon v-else-if="tone.icon" :icon="tone.icon" class="me-1" />{{ label }}
   </button>
 
   <span v-if="printer.lastError" class="small text-danger" role="alert">

@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { IconDeviceFloppy, IconHistory, IconPrinter, IconX } from '@tabler/icons-vue'
 import { computed } from 'vue'
 
 import LabelListPanel from '@/components/label/LabelListPanel.vue'
 import AppIcon from '@/components/ui/AppIcon.vue'
 import { useOpenInEditor } from '@/composables/useOpenInEditor'
 import { PT_P300BT } from '@/core/printer'
+import { IconDeviceFloppy, IconHistory, IconPrinter, IconX } from '@/icons'
 import { useLabelStore } from '@/stores/label'
 import { usePrinterStore } from '@/stores/printer'
 import { useProjectsStore } from '@/stores/projects'
@@ -103,7 +103,7 @@ function clear() {
         :disabled="queue.isPrinting"
         @click="moveSelectedToHistory(entry.id)"
       >
-        <AppIcon :icon="IconHistory" :size="16" class="me-1" />Move to history
+        <AppIcon :icon="IconHistory" class="me-1" />Move to history
       </button>
       <button
         type="button"
@@ -112,7 +112,7 @@ function clear() {
         :disabled="queue.isPrinting"
         @click="removeSelected(entry.id)"
       >
-        <AppIcon :icon="IconX" :size="16" class="me-1" />Remove
+        <AppIcon :icon="IconX" class="me-1" />Remove
       </button>
     </template>
     <template #actions>
@@ -128,7 +128,7 @@ function clear() {
             class="spinner-border spinner-border-sm me-1"
             aria-hidden="true"
           />
-          <AppIcon v-else :icon="IconPrinter" :size="16" class="me-1" />{{ printLabel }}
+          <AppIcon v-else :icon="IconPrinter" class="me-1" />{{ printLabel }}
         </button>
       </span>
       <div class="btn-group btn-group-sm" role="group" aria-label="Save the queue as a project">
@@ -143,7 +143,7 @@ function clear() {
           :disabled="!queue.count || queue.isPrinting"
           @click="save"
         >
-          <AppIcon :icon="IconDeviceFloppy" :size="16" class="me-1" />
+          <AppIcon :icon="IconDeviceFloppy" class="me-1" />
           {{ projects.current ? 'Save' : 'Save as project…' }}
         </button>
         <button

@@ -1,35 +1,14 @@
 <script setup lang="ts">
-/**
- * Card whose body folds away, driven by Bootstrap's Collapse plugin.
- * Follows the Bootstrap JS wrapper pattern (see AppDropdown): the plugin owns
- * the `show` class; Vue only mirrors it into the `open` model.
- */
-import { IconChevronDown, IconChevronRight } from '@tabler/icons-vue'
-import Collapse from 'bootstrap/js/dist/collapse'
-import { onBeforeUnmount, onMounted, ref, useId } from 'vue'
+/** Card whose body folds away: Bootstrap's `.collapse` / `.show` classes, toggled by Vue. */
+import { useId } from 'vue'
 
 import AppIcon from '@/components/ui/AppIcon.vue'
+import { IconChevronDown, IconChevronRight } from '@/icons'
 
 defineProps<{ title: string }>()
 
 const open = defineModel<boolean>('open', { default: true })
 const bodyId = useId()
-const bodyEl = ref<HTMLElement | null>(null)
-// Read once: the plugin toggles the class from here on.
-const initiallyOpen = open.value
-let instance: Collapse | null = null
-
-onMounted(() => {
-  const el = bodyEl.value!
-  instance = Collapse.getOrCreateInstance(el, { toggle: false })
-  el.addEventListener('shown.bs.collapse', () => (open.value = true))
-  el.addEventListener('hidden.bs.collapse', () => (open.value = false))
-})
-
-onBeforeUnmount(() => {
-  instance?.dispose()
-  instance = null
-})
 </script>
 
 <template>
@@ -38,18 +17,17 @@ onBeforeUnmount(() => {
       <button
         type="button"
         class="btn btn-link link-body-emphasis text-decoration-none p-0 d-inline-flex align-items-center gap-1"
-        data-bs-toggle="collapse"
-        :data-bs-target="`#${bodyId}`"
         :aria-expanded="open"
         :aria-controls="bodyId"
+        @click="open = !open"
       >
-        <AppIcon :icon="open ? IconChevronDown : IconChevronRight" :size="16" />
+        <AppIcon :icon="open ? IconChevronDown : IconChevronRight" />
         {{ title }}
       </button>
       <span class="small text-body-secondary"><slot name="meta" /></span>
       <span class="ms-auto d-flex flex-wrap align-items-center gap-2"><slot name="actions" /></span>
     </div>
-    <div :id="bodyId" ref="bodyEl" class="collapse" :class="{ show: initiallyOpen }">
+    <div :id="bodyId" class="collapse" :class="{ show: open }">
       <div class="card-body">
         <slot />
       </div>

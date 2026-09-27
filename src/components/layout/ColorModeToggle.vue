@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { IconMoonStars, IconSun } from '@tabler/icons-vue'
 import { computed } from 'vue'
 
 import AppIcon from '@/components/ui/AppIcon.vue'
+import { IconMoonStars, IconSun } from '@/icons'
 import { useSettingsStore } from '@/stores/settings'
 
 const settings = useSettingsStore()
@@ -18,7 +18,7 @@ const nextLabel = computed(() => (isDark.value ? 'Switch to light theme' : 'Swit
     :title="nextLabel"
     @click="settings.toggleColorMode()"
   >
-    <AppIcon :icon="isDark ? IconSun : IconMoonStars" :size="16" />
+    <AppIcon :icon="isDark ? IconSun : IconMoonStars" />
     <span class="visually-hidden">{{ nextLabel }}</span>
   </button>
 </template>

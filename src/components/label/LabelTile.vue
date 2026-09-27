@@ -7,6 +7,7 @@ import { findBundledFont } from '@/core/fonts'
 import { splitLines, type LabelDocument } from '@/core/label'
 import { usePrinterStore } from '@/stores/printer'
 import { useRasterCacheStore } from '@/stores/rasterCache'
+import { useSettingsStore } from '@/stores/settings'
 
 const props = defineProps<{
   doc: LabelDocument
@@ -20,6 +21,7 @@ const emit = defineEmits<{ open: [] }>()
 
 const printer = usePrinterStore()
 const cache = useRasterCacheStore()
+const settings = useSettingsStore()
 
 const rendered = computed(() => cache.get(props.doc))
 
@@ -40,7 +42,7 @@ const tooltip = computed(() => {
 
 <template>
   <div
-    class="d-inline-block mw-100 border rounded overflow-hidden"
+    class="d-inline-block mw-100 border rounded-1 overflow-hidden"
     :class="{ 'border-primary': active }"
     role="button"
     tabindex="0"
@@ -49,7 +51,13 @@ const tooltip = computed(() => {
     @click="emit('open')"
     @keydown.enter="emit('open')"
   >
-    <LabelPreview :raster="rendered.raster" :tape="printer.tape" :scale="1" compact />
+    <LabelPreview
+      :raster="rendered.raster"
+      :tape="printer.tape"
+      :scale="1"
+      :dark="settings.darkTape"
+      compact
+    />
     <p v-if="rendered.error" class="text-danger small mb-0 px-1">{{ rendered.error }}</p>
   </div>
 </template>

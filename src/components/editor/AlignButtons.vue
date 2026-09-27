@@ -1,17 +1,17 @@
 <script setup lang="ts">
 /** Left / centre / right choice, for text lines or for the text's place on the tape. */
-import {
-  IconAlignCenter,
-  IconAlignLeft,
-  IconAlignRight,
-  IconLayoutAlignCenter,
-  IconLayoutAlignLeft,
-  IconLayoutAlignRight,
-} from '@tabler/icons-vue'
 import { computed } from 'vue'
 
 import SegmentedControl, { type SegmentedOption } from '@/components/ui/SegmentedControl.vue'
 import type { TextAlign } from '@/core/label'
+import {
+  IconAlignCenter,
+  IconAlignLeft,
+  IconAlignRight,
+  IconTapeCenter,
+  IconTapeEnd,
+  IconTapeStart,
+} from '@/icons'
 
 const props = withDefaults(defineProps<{ kind?: 'text' | 'tape'; disabled?: boolean }>(), {
   kind: 'text',
@@ -32,9 +32,9 @@ const KINDS: Record<'text' | 'tape', { name: string; options: SegmentedOption<Te
   tape: {
     name: 'Text position on the tape',
     options: [
-      { value: 'left', label: 'Text at the start of the tape', icon: IconLayoutAlignLeft },
-      { value: 'center', label: 'Text centered on the tape', icon: IconLayoutAlignCenter },
-      { value: 'right', label: 'Text at the end of the tape', icon: IconLayoutAlignRight },
+      { value: 'left', label: 'Text at the start of the tape', icon: IconTapeStart },
+      { value: 'center', label: 'Text centered on the tape', icon: IconTapeCenter },
+      { value: 'right', label: 'Text at the end of the tape', icon: IconTapeEnd },
     ],
   },
 }

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { computed, ref, shallowRef } from 'vue'
+import { computed, ref, shallowRef, watch } from 'vue'
 
 import { usePersistedRef } from '@/composables/usePersistedRef'
 import {
@@ -14,12 +14,14 @@ import {
   type RasterImage,
   type TapeSpec,
 } from '@/core/printer'
+import { useSettingsStore } from '@/stores/settings'
 
 export type ConnectionState = 'disconnected' | 'connecting' | 'connected'
 export type PrinterActivity = 'idle' | 'status' | 'printing'
 export type BatchHooks = Pick<BatchPrintHooks, 'onJobStart' | 'onJobDone'>
 
 export const usePrinterStore = defineStore('printer', () => {
+  const settings = useSettingsStore()
   const supported = WebSerialTransport.isSupported()
   const connection = ref<ConnectionState>('disconnected')
   const activity = ref<PrinterActivity>('idle')
@@ -41,11 +43,15 @@ export const usePrinterStore = defineStore('printer', () => {
   const isConnected = computed(() => connection.value === 'connected')
   const canPrint = computed(() => isConnected.value && activity.value === 'idle')
   const statusInfo = computed(() => (status.value ? describeStatus(status.value) : null))
-  /** Tape loaded in the printer, or the default until a status is known. */
+  /** Tape labels are designed for: the chosen width, which follows the printer's tape. */
   const tape = computed<TapeSpec>(
-    () =>
-      (status.value && tapeForReportedWidth(status.value.mediaWidthMm)) || PT_P300BT.defaultTape,
+    () => tapeForReportedWidth(settings.tapeWidthMm) ?? PT_P300BT.defaultTape,
   )
+  // The printer knows what is loaded; every status report updates the choice.
+  watch(status, (current) => {
+    const loaded = current && tapeForReportedWidth(current.mediaWidthMm)
+    if (loaded) settings.tapeWidthMm = loaded.widthMm
+  })
 
   function fail(error: unknown) {
     lastError.value = error instanceof Error ? error.message : String(error)

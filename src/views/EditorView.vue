@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { IconAlertTriangle } from '@tabler/icons-vue'
-
 import HistoryPanel from '@/components/panels/HistoryPanel.vue'
 import PreviewPanel from '@/components/panels/PreviewPanel.vue'
 import ProjectsPanel from '@/components/panels/ProjectsPanel.vue'
 import QueuePanel from '@/components/panels/QueuePanel.vue'
 import TextPanel from '@/components/panels/TextPanel.vue'
 import AppIcon from '@/components/ui/AppIcon.vue'
+import { IconAlertTriangle } from '@/icons'
 import { usePrinterStore } from '@/stores/printer'
 
 const printer = usePrinterStore()

@@ -45,9 +45,9 @@ export function createBackup(
   }
 }
 
-/** `p300bt-labels-YYYY-MM-DD.json`, dated in local time. */
+/** `labelartor-YYYY-MM-DD.json`, dated in local time. */
 export function backupFileName(date = new Date()): string {
-  return `p300bt-labels-${localDate(date)}.json`
+  return `labelartor-${localDate(date)}.json`
 }
 
 /** Parses and validates a backup; throws {@link BackupError} on anything unexpected. */
@@ -70,13 +70,13 @@ export function createProjectFile(project: Project): ProjectFile {
   return { version: BACKUP_VERSION, kind: 'project', project }
 }
 
-/** `p300bt-project-<name>.json`, with the name reduced to safe characters. */
+/** `labelartor-project-<name>.json`, with the name reduced to safe characters. */
 export function projectFileName(project: Project): string {
   const slug = project.name
     .toLowerCase()
     .replace(/[^\p{L}\p{N}]+/gu, '-')
     .replace(/^-+|-+$/g, '')
-  return `p300bt-project-${slug || project.id}.json`
+  return `labelartor-project-${slug || project.id}.json`
 }
 
 export function parseProjectFile(json: string): Project {

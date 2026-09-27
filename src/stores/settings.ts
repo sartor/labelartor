@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
 import { usePersistedRef } from '@/composables/usePersistedRef'
+import { PT_P300BT } from '@/core/printer'
 
 export type ColorMode = 'auto' | 'light' | 'dark'
 export type PreviewScale = 1 | 2 | 3
@@ -19,6 +20,10 @@ export const useSettingsStore = defineStore('settings', () => {
   const colorMode = usePersistedRef<ColorMode>('settings.colorMode', 'auto')
   const previewScale = usePersistedRef<PreviewScale>('settings.previewScale', 2)
   const showTapeLead = usePersistedRef('settings.showTapeLead', true)
+  /** Preview labels as white text on black tape (a white-on-black cartridge). */
+  const darkTape = usePersistedRef('settings.darkTape', false)
+  /** Tape width labels are designed for; follows the printer's tape once it reports one. */
+  const tapeWidthMm = usePersistedRef<number>('settings.tapeWidthMm', PT_P300BT.defaultTape.widthMm)
   /** Which panels are expanded. */
   const openPanes = usePersistedRef('settings.openPanes', DEFAULT_OPEN_PANES)
   // Panels added later are open until the user folds them.
@@ -36,5 +41,14 @@ export const useSettingsStore = defineStore('settings', () => {
     colorMode.value = resolvedColorMode.value === 'dark' ? 'light' : 'dark'
   }
 
-  return { colorMode, resolvedColorMode, toggleColorMode, previewScale, showTapeLead, openPanes }
+  return {
+    colorMode,
+    resolvedColorMode,
+    toggleColorMode,
+    previewScale,
+    showTapeLead,
+    darkTape,
+    tapeWidthMm,
+    openPanes,
+  }
 })

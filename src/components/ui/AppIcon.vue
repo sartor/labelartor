@@ -1,15 +1,35 @@
 <script setup lang="ts">
 /**
- * Inline SVG icon (Tabler) sized to sit in Bootstrap text and buttons.
- * Sizes are whole pixels so the strokes stay crisp: 16 in `btn-sm` and menu
- * items, 18 in regular text and buttons, 22 in `btn-lg`.
+ * Inline icon from `@/icons`. The drawing is always 16 px, on a 16-unit grid
+ * with whole-number coordinates, so every straight edge lands on a pixel
+ * boundary. `size` is the box it sits in: 16 for small buttons, menu items
+ * and input-group addons; 20 for regular-size buttons, whose 20 px line box
+ * would otherwise show a 16 px icon 2 px too high.
  */
-import type { Component } from 'vue'
+import { computed } from 'vue'
 
-withDefaults(defineProps<{ icon: Component; size?: number }>(), { size: 18 })
+import type { IconPath } from '@/icons'
+
+const props = withDefaults(defineProps<{ icon: IconPath; size?: 16 | 20 }>(), { size: 16 })
+
+// Centres the drawing in the box by a whole number of pixels.
+const viewBox = computed(() => {
+  const inset = (props.size - 16) / 2
+  return `${-inset} ${-inset} ${props.size} ${props.size}`
+})
 </script>
 
 <template>
-  <!-- text-top keeps the icon centred on the text's capitals; middle sits ~1.5px low. -->
-  <component :is="icon" :size="size" class="align-text-top" aria-hidden="true" />
+  <!-- text-top: the box starts at the top of the line box, where its height centres the drawing. -->
+  <svg
+    :width="size"
+    :height="size"
+    :viewBox="viewBox"
+    fill="currentColor"
+    fill-rule="evenodd"
+    class="align-text-top"
+    aria-hidden="true"
+  >
+    <path :d="icon" />
+  </svg>
 </template>

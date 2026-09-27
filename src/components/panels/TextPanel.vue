@@ -1,12 +1,5 @@
 <script setup lang="ts">
 /** The label editor: text and typography controls, with print/queue actions in the header. */
-import {
-  IconArrowBackUp,
-  IconDeviceFloppy,
-  IconLineHeight,
-  IconPlaylistAdd,
-  IconPrinter,
-} from '@tabler/icons-vue'
 import { computed } from 'vue'
 
 import AlignButtons from '@/components/editor/AlignButtons.vue'
@@ -22,6 +15,13 @@ import { useLabelActions } from '@/composables/useLabelActions'
 import { fontHasBold } from '@/core/fonts'
 import { LINE_HEIGHT, splitLines } from '@/core/label'
 import { PT_P300BT } from '@/core/printer'
+import {
+  IconArrowBackUp,
+  IconDeviceFloppy,
+  IconLineHeight,
+  IconPlaylistAdd,
+  IconPrinter,
+} from '@/icons'
 import { useLabelStore } from '@/stores/label'
 import { useLabelRenderStore } from '@/stores/labelRender'
 import { useSettingsStore } from '@/stores/settings'
@@ -63,7 +63,7 @@ const tapeUsedMm = computed(() => render.lengthMm + leadMm.value)
           @click="printLabel"
         >
           <span v-if="printing" class="spinner-border spinner-border-sm me-1" aria-hidden="true" />
-          <AppIcon v-else :icon="IconPrinter" :size="16" class="me-1" />
+          <AppIcon v-else :icon="IconPrinter" class="me-1" />
           {{ printing ? 'Printing…' : 'Print' }}
         </button>
         <span class="input-group-text">or</span>
@@ -74,7 +74,7 @@ const tapeUsedMm = computed(() => render.lengthMm + leadMm.value)
           title="Add this label to the print queue as a new entry"
           @click="addToQueue"
         >
-          <AppIcon :icon="IconPlaylistAdd" :size="16" class="me-1" />Add to queue
+          <AppIcon :icon="IconPlaylistAdd" class="me-1" />Add to queue
         </button>
         <template v-if="editingFrom">
           <button
@@ -84,7 +84,7 @@ const tapeUsedMm = computed(() => render.lengthMm + leadMm.value)
             title="Save the changes into the queued label and go back to the queue"
             @click="saveAndReturn"
           >
-            <AppIcon :icon="IconDeviceFloppy" :size="16" class="me-1" />Save and return to queue
+            <AppIcon :icon="IconDeviceFloppy" class="me-1" />Save and return to queue
           </button>
           <button
             type="button"
@@ -92,7 +92,7 @@ const tapeUsedMm = computed(() => render.lengthMm + leadMm.value)
             title="Stop editing this label"
             @click="cancelEditing"
           >
-            <AppIcon :icon="IconArrowBackUp" :size="16" class="me-1" />Cancel
+            <AppIcon :icon="IconArrowBackUp" class="me-1" />Cancel
           </button>
         </template>
       </div>

@@ -13,10 +13,10 @@ export interface EditingRef {
 
 /** The label currently being edited (persisted as a draft). */
 export const useLabelStore = defineStore('label', () => {
-  const text = usePersistedRef('label.text', 'Hello, label!')
+  const text = usePersistedRef('label.text', 'Labelartor')
   const fontFamily = usePersistedRef('label.fontFamily', DEFAULT_FONT_FAMILY)
   const bold = usePersistedRef('label.bold', false)
-  const fontSizePx = usePersistedRef<number>('label.fontSizePx', 0)
+  const fontSizePx = usePersistedRef<number>('label.fontSizePx', 68)
   const align = usePersistedRef<TextAlign>('label.align', 'center')
   const lineHeight = usePersistedRef<number>('label.lineHeight', LINE_HEIGHT.default)
   const lengthMm = usePersistedRef<number>('label.lengthMm', 0)

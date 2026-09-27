@@ -1,9 +1,9 @@
 <script setup lang="ts">
 /** Bold on/off (Bootstrap `.btn-check` checkbox). */
-import { IconBold } from '@tabler/icons-vue'
 import { useId } from 'vue'
 
 import AppIcon from '@/components/ui/AppIcon.vue'
+import { IconBold } from '@/icons'
 
 defineProps<{
   /** The current font has no bold face. */
@@ -25,7 +25,7 @@ const id = useId()
       autocomplete="off"
     />
     <label class="btn btn-outline-secondary" :for="id">
-      <AppIcon :icon="IconBold" />
+      <AppIcon :icon="IconBold" :size="20" />
       <span class="visually-hidden">Bold</span>
     </label>
   </span>

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 /** Export / import of everything (queue, history, projects) as one JSON file. */
-import { IconDatabase, IconDownload, IconUpload } from '@tabler/icons-vue'
 import { ref } from 'vue'
 
 import AppDropdown from '@/components/ui/AppDropdown.vue'
 import AppIcon from '@/components/ui/AppIcon.vue'
 import { useBackup } from '@/composables/useBackup'
 import { useOpenInEditor } from '@/composables/useOpenInEditor'
+import { IconDatabase, IconDownload, IconUpload } from '@/icons'
 
 const { exportAll, importAll } = useBackup()
 const editor = useOpenInEditor()
@@ -38,17 +38,17 @@ async function onFileChosen(event: Event) {
     title="Back up or restore the queue, history and projects"
   >
     <template #toggle>
-      <AppIcon :icon="IconDatabase" :size="16" />
+      <AppIcon :icon="IconDatabase" />
       <span class="visually-hidden">Backup</span>
     </template>
     <li>
       <button type="button" class="dropdown-item" @click="exportAll">
-        <AppIcon :icon="IconDownload" :size="16" class="me-2" />Export everything
+        <AppIcon :icon="IconDownload" class="me-2" />Export everything
       </button>
     </li>
     <li>
       <button type="button" class="dropdown-item" @click="fileInput?.click()">
-        <AppIcon :icon="IconUpload" :size="16" class="me-2" />Import from file…
+        <AppIcon :icon="IconUpload" class="me-2" />Import from file…
       </button>
     </li>
   </AppDropdown>

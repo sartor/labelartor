@@ -19,7 +19,7 @@ const labels = () =>
 
 <template>
   <div
-    class="d-inline-flex flex-column gap-1 border rounded p-2 small"
+    class="d-inline-flex flex-column gap-1 border rounded-1 p-2 small"
     :class="{ 'border-primary': active }"
     role="button"
     tabindex="0"

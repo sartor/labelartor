@@ -5,13 +5,13 @@
  * rows. Actions for the selected label appear in the header while one is
  * selected.
  */
-import { IconTrash } from '@tabler/icons-vue'
 import { computed } from 'vue'
 
 import LabelTile from '@/components/label/LabelTile.vue'
 import AppIcon from '@/components/ui/AppIcon.vue'
 import CollapsibleCard from '@/components/ui/CollapsibleCard.vue'
 import type { LabelEntry } from '@/core/label'
+import { IconTrash } from '@/icons'
 import { useRasterCacheStore } from '@/stores/rasterCache'
 
 const props = withDefaults(
@@ -94,7 +94,7 @@ function confirmClear() {
         :disabled="!items.length || clearDisabled"
         @click="confirmClear"
       >
-        <AppIcon :icon="IconTrash" :size="16" class="me-1" />{{ clearLabel }}
+        <AppIcon :icon="IconTrash" class="me-1" />{{ clearLabel }}
       </button>
     </template>
 

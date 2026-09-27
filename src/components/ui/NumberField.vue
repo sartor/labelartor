@@ -4,13 +4,14 @@
  * once; when the edit is committed the value is clamped and rounded to the
  * step, so a half-typed "0.9" is not clamped at the intermediate "0".
  */
-import { computed, useId, type Component } from 'vue'
+import { computed, useId } from 'vue'
 
 import AppIcon from '@/components/ui/AppIcon.vue'
+import type { IconPath } from '@/icons'
 
 const props = withDefaults(
   defineProps<{
-    icon: Component
+    icon: IconPath
     /** Accessible name of the field. */
     label: string
     min: number

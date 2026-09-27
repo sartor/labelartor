@@ -18,16 +18,22 @@ const props = withDefaults(
     showLead?: boolean
     /** No padding around the strip and a terse placeholder (for lists of labels). */
     compact?: boolean
+    /** White text on black tape (a white-on-black cartridge) instead of black on white. */
+    dark?: boolean
   }>(),
-  { scale: 1, showLead: false, compact: false },
+  { scale: 1, showLead: false, compact: false, dark: false },
 )
 
-const COLORS = {
-  ink: [17, 17, 17] as [number, number, number],
-  tape: [255, 255, 255] as [number, number, number],
-}
+type Rgb = [number, number, number]
+const BLACK: Rgb = [17, 17, 17]
+const WHITE: Rgb = [255, 255, 255]
 
 const canvas = ref<HTMLCanvasElement | null>(null)
+
+const colors = computed(() =>
+  props.dark ? { ink: WHITE, tape: BLACK } : { ink: BLACK, tape: WHITE },
+)
+const tapeBg = computed(() => (props.dark ? 'bg-black' : 'bg-white'))
 
 const mm = (value: number) => `${(value * props.scale).toFixed(3)}mm`
 const printableMm = computed(() => dotsToMm(props.tape.printableDots))
@@ -46,7 +52,7 @@ watchPostEffect(() => {
   const el = canvas.value
   const raster = props.raster
   if (!el || !raster) return
-  const pixels = rasterToPixels(raster, props.tape.printableDots, COLORS)
+  const pixels = rasterToPixels(raster, props.tape.printableDots, colors.value)
   el.width = pixels.width
   el.height = pixels.height
   el.getContext('2d')?.putImageData(new ImageData(pixels.data, pixels.width, pixels.height), 0, 0)
@@ -57,18 +63,19 @@ watchPostEffect(() => {
   <div class="overflow-x-auto" :class="{ 'py-2 px-1': !compact }">
     <div
       v-if="raster"
-      class="d-inline-flex align-top bg-white"
-      :class="{ 'border shadow-sm': !compact }"
+      class="d-inline-flex align-top"
+      :class="[tapeBg, { 'border shadow-sm': !compact }]"
       :style="{ height: mm(tape.widthMm) }"
       :title="`${tape.widthMm} mm tape`"
     >
       <div
         v-if="showLead"
         class="tape-lead d-flex flex-shrink-0 align-items-center justify-content-center overflow-hidden"
+        :class="{ dark }"
         :style="{ width: mm(PT_P300BT.unusedLeadMm) }"
         :title="`${PT_P300BT.unusedLeadMm} mm of tape fed before printing starts`"
       >
-        <span class="small text-secondary bg-white px-1 text-nowrap">
+        <span class="small text-secondary px-1 text-nowrap" :class="tapeBg">
           {{ PT_P300BT.unusedLeadMm }} mm
         </span>
       </div>
@@ -76,7 +83,7 @@ watchPostEffect(() => {
         <canvas
           ref="canvas"
           class="d-block"
-          :class="{ pixelated, 'print-area': !compact }"
+          :class="{ pixelated, dark, 'print-area': !compact }"
           :style="{ width: mm(dotsToMm(raster.lines)), height: mm(printableMm) }"
         />
       </div>
@@ -89,8 +96,8 @@ watchPostEffect(() => {
 </template>
 
 <!--
-  Tape drawing specifics only (no Bootstrap overrides): the tape is always
-  white paper, whatever the theme, so these colours are fixed on purpose.
+  Tape drawing specifics only (no Bootstrap overrides): the tape keeps its own
+  colours whatever the theme, so these are fixed on purpose.
 -->
 <style scoped>
 .tape-lead {
@@ -98,9 +105,18 @@ watchPostEffect(() => {
   border-right: 1px dashed #adb5bd;
 }
 
+.tape-lead.dark {
+  background: repeating-linear-gradient(-45deg, #111 0 3px, #343a40 3px 6px);
+  border-right-color: #6c757d;
+}
+
 /* Dashed print-area outline: editor preview only. */
 .print-area {
   outline: 1px dashed rgb(0 0 0 / 0.12);
+}
+
+.print-area.dark {
+  outline-color: rgb(255 255 255 / 0.25);
 }
 
 .pixelated {

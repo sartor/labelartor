@@ -72,7 +72,7 @@ describe('backup', () => {
   })
 
   test('file name carries the local date', () => {
-    expect(backupFileName(new Date(2026, 8, 27, 0, 30))).toBe('p300bt-labels-2026-09-27.json')
+    expect(backupFileName(new Date(2026, 8, 27, 0, 30))).toBe('labelartor-2026-09-27.json')
   })
 
   test('merge keeps existing entries and skips duplicates', () => {
@@ -101,8 +101,8 @@ describe('project file', () => {
 
   test('file name is made from the project name', () => {
     const named = createProject('Кухня / Kitchen 2!', [], 0)
-    expect(projectFileName(named)).toBe('p300bt-project-кухня-kitchen-2.json')
+    expect(projectFileName(named)).toBe('labelartor-project-кухня-kitchen-2.json')
     const symbols = createProject('***', [], 0)
-    expect(projectFileName(symbols)).toBe(`p300bt-project-${symbols.id}.json`)
+    expect(projectFileName(symbols)).toBe(`labelartor-project-${symbols.id}.json`)
   })
 })

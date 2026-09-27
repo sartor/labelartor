@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { IconPlaylistAdd, IconX } from '@tabler/icons-vue'
 import { computed } from 'vue'
 
 import LabelListPanel from '@/components/label/LabelListPanel.vue'
 import AppIcon from '@/components/ui/AppIcon.vue'
 import { useOpenInEditor } from '@/composables/useOpenInEditor'
 import type { PrintedEntry } from '@/core/label'
+import { IconPlaylistAdd, IconX } from '@/icons'
 import { useHistoryStore } from '@/stores/history'
 import { useLabelStore } from '@/stores/label'
 import { useQueueStore } from '@/stores/queue'
@@ -53,7 +53,7 @@ function removeSelected(id: string) {
         title="Add the selected label to the print queue"
         @click="queueSelected(entry)"
       >
-        <AppIcon :icon="IconPlaylistAdd" :size="16" class="me-1" />Add to queue
+        <AppIcon :icon="IconPlaylistAdd" class="me-1" />Add to queue
       </button>
       <button
         type="button"
@@ -61,7 +61,7 @@ function removeSelected(id: string) {
         title="Remove the selected label from the history"
         @click="removeSelected(entry.id)"
       >
-        <AppIcon :icon="IconX" :size="16" class="me-1" />Remove
+        <AppIcon :icon="IconX" class="me-1" />Remove
       </button>
     </template>
   </LabelListPanel>
