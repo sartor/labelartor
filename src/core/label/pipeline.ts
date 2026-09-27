@@ -5,7 +5,7 @@
 
 import { ensureFontLoaded, fontHasBold, isFontLoaded } from '../fonts'
 import { PT_P300BT, dotsToMm, mmToDots, type RasterImage, type TapeSpec } from '../printer'
-import { layoutText, type MeasureText, type TextLayout } from './layout'
+import { METRICS_PROBE, layoutText, type MeasureText, type TextLayout } from './layout'
 import { rasterize } from './rasterize'
 import { canvasMeasure, renderLayout } from './render'
 import { SHARPNESS_SCALE, measureSharpness } from './sharpness'
@@ -47,8 +47,11 @@ function documentFontWeight(doc: LabelDocument): 400 | 700 {
   return effectiveDocument(doc).bold ? 700 : 400
 }
 
+/** The glyphs a render needs: the text and the probe the line box is measured on. */
+const glyphsOf = (doc: LabelDocument) => doc.text + METRICS_PROBE
+
 export function isDocumentFontLoaded(doc: LabelDocument): boolean {
-  return isFontLoaded(doc.fontFamily, doc.text, documentFontWeight(doc))
+  return isFontLoaded(doc.fontFamily, glyphsOf(doc), documentFontWeight(doc))
 }
 
 export async function renderDocument(
@@ -56,7 +59,7 @@ export async function renderDocument(
   { tape, countLead, measure = canvasMeasure(), withSharpness = false }: RenderOptions,
 ): Promise<RenderedLabel> {
   const doc = effectiveDocument(source)
-  await ensureFontLoaded(doc.fontFamily, doc.text, documentFontWeight(doc))
+  await ensureFontLoaded(doc.fontFamily, glyphsOf(doc), documentFontWeight(doc))
 
   const text = layoutText(
     doc,

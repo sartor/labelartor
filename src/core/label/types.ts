@@ -12,15 +12,18 @@ export interface LabelDocument {
   /** Font size in dots; 0 means the largest size that fits the tape. */
   fontSizePx: number
   align: TextAlign
-  /** Distance between baselines relative to the ink height of one line. */
-  lineHeight: number
+  /**
+   * Space between the line boxes in dots: 0 = touching, negative =
+   * overlapping. The layout keeps it within what fits the tape.
+   */
+  lineGap: number
   /** Wanted total tape length in mm; 0 means as long as the text needs. */
   lengthMm: number
   /** Where the text sits on the tape when `lengthMm` leaves room to spare. */
   tapeAlign: TextAlign
 }
 
-export const LINE_HEIGHT = { min: 0.8, max: 3, step: 0.05, default: 1 } as const
+export const LINE_GAP = { default: 0, step: 1 } as const
 
 /** A chosen font size may go down to this share of the largest size that fits. */
 export const FONT_SIZE = { minRatio: 0.3 } as const

@@ -22,7 +22,7 @@ const doc: LabelDocument = {
   bold: true,
   fontSizePx: 0,
   align: 'center',
-  lineHeight: 1,
+  lineGap: 0,
   lengthMm: 40,
   tapeAlign: 'right',
 }
@@ -91,7 +91,7 @@ describe('backup', () => {
       bold: false,
       fontSizePx: 0,
       align: 'left',
-      lineHeight: 1,
+      lineGap: 0,
       lengthMm: 0,
       tapeAlign: 'left',
     })

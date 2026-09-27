@@ -1,6 +1,6 @@
 {
   "name": "labelartor",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Web app to design and print labels on the Brother PT-P300BT over Web Serial (Bluetooth SPP).",
   "type": "module",

@@ -14,7 +14,7 @@ the browser.
 ## Features
 
 - Text labels of one or more lines: font, bold (only fonts with a real bold face), size
-  (auto fills the tape), line height, left / centre / right alignment.
+  (auto fills the tape), line gap, left / centre / right alignment.
 - 30 bundled fonts in sans, condensed, mono and pixel groups.
 - Preview at real size (1×, 2× or 3×), with crispness score for pixel perfect prints.
 - Print queue: collect labels and print them as one batch.

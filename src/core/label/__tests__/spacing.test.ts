@@ -50,6 +50,9 @@ describe('applySpacing', () => {
     font: '10px x',
     fontSizePx: 10,
     maxFontSizePx: 10,
+    lineGap: 0,
+    minLineGap: 0,
+    maxLineGap: 0,
     lines: [{ text: 'a', x: 7, baseline: 30, width: 26 }],
   }
 

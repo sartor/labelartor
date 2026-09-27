@@ -2,14 +2,13 @@ import { describe, expect, test } from 'bun:test'
 
 import {
   clampFontSize,
-  clampLineHeight,
   cssFont,
   layoutText,
   minFontSize,
   splitLines,
   type MeasureText,
 } from '../layout'
-import { LINE_HEIGHT, type LabelDocument } from '../types'
+import { LINE_GAP, type LabelDocument } from '../types'
 
 const fontSize = (font: string) => Number(/(\d+)px/.exec(font)![1])
 
@@ -20,6 +19,19 @@ const measure: MeasureText = (text, font) => {
   return { width: text.length * size * em, ascent: size * 0.7, descent: size * 0.2 }
 }
 
+/**
+ * Like `measure`, but the ink depends on the letters: descenders reach
+ * 0.2em down, other letters 0.05em; a breve (Й) reaches 0.9em up.
+ */
+const measureByLetter: MeasureText = (text, font) => {
+  const size = fontSize(font)
+  return {
+    width: text.length * size * 0.55,
+    ascent: size * (text.includes('Й') ? 0.9 : 0.7),
+    descent: size * (/[gjpqyру]/.test(text) ? 0.2 : 0.05),
+  }
+}
+
 const spec = { heightDots: 64, paddingDots: 8 }
 const doc = (text: string, extra: Partial<LabelDocument> = {}): LabelDocument => ({
   text,
@@ -27,13 +39,17 @@ const doc = (text: string, extra: Partial<LabelDocument> = {}): LabelDocument =>
   fontFamily: 'Test',
   bold: false,
   fontSizePx: 0,
-  lineHeight: LINE_HEIGHT.default,
+  lineGap: LINE_GAP.default,
   lengthMm: 0,
   tapeAlign: 'left',
   ...extra,
 })
 
 const isInt = (n: number) => Number.isInteger(n)
+/** Line box of the plain fake at `size`: ceil(0.7 size) + ceil(0.2 size). */
+const ink = (size: number) => Math.ceil(size * 0.7) + Math.ceil(size * 0.2)
+const pitch = (layout: { lines: { baseline: number }[] }) =>
+  layout.lines[1]!.baseline - layout.lines[0]!.baseline
 
 describe('layoutText', () => {
   test('single line fills the printable height with snapped metrics', () => {
@@ -45,6 +61,7 @@ describe('layoutText', () => {
     expect(layout.lines[0]!.x).toBe(8)
     expect(layout.lines[0]!.baseline).toBe(49)
     expect(layout.width).toBe(Math.ceil(4 * 70 * 0.55) + 16)
+    expect([layout.lineGap, layout.minLineGap, layout.maxLineGap]).toEqual([0, 0, 0])
   })
 
   test('a chosen font size is used, centred, and kept within limits', () => {
@@ -58,6 +75,25 @@ describe('layoutText', () => {
 
     expect(layoutText(doc('ABCD', { fontSizePx: 200 }), spec, measure).fontSizePx).toBe(70)
     expect(layoutText(doc('ABCD', { fontSizePx: 5 }), spec, measure).fontSizePx).toBe(21)
+  })
+
+  test('the line box comes from the font, not from the letters in the text', () => {
+    const flat = layoutText(doc('left\nleft', { fontSizePx: 24 }), spec, measureByLetter)
+    const deep = layoutText(doc('right\nright', { fontSizePx: 24 }), spec, measureByLetter)
+    expect(deep.fontSizePx).toBe(flat.fontSizePx)
+    expect(deep.contentHeight).toBe(flat.contentHeight)
+    expect(deep.lines.map((l) => l.baseline)).toEqual(flat.lines.map((l) => l.baseline))
+
+    const autoFlat = layoutText(doc('left'), spec, measureByLetter)
+    const autoDeep = layoutText(doc('right'), spec, measureByLetter)
+    expect(autoDeep.fontSizePx).toBe(autoFlat.fontSizePx)
+  })
+
+  test('letters reaching beyond the usual line box still count, so nothing is cut', () => {
+    const plain = layoutText(doc('И'), spec, measureByLetter)
+    const breve = layoutText(doc('Й'), spec, measureByLetter)
+    expect(breve.fontSizePx).toBeLessThan(plain.fontSizePx)
+    expect(breve.lines[0]!.baseline - Math.ceil(breve.fontSizePx * 0.9)).toBeGreaterThanOrEqual(0)
   })
 
   test('font size limits', () => {
@@ -91,20 +127,52 @@ describe('layoutText', () => {
     const layout = layoutText(doc('AB\nCD\nEF'), spec, measure)
     const [a, b, c] = layout.lines.map((l) => l.baseline)
     expect(b! - a!).toBe(c! - b!)
-    const ascent = Math.ceil(layout.fontSizePx * 0.7)
-    const descent = Math.ceil(layout.fontSizePx * 0.2)
-    expect(a! - ascent).toBeGreaterThanOrEqual(0)
-    expect(c! + descent).toBeLessThanOrEqual(64)
+    expect(a! - Math.ceil(layout.fontSizePx * 0.7)).toBeGreaterThanOrEqual(0)
+    expect(c! + Math.ceil(layout.fontSizePx * 0.2)).toBeLessThanOrEqual(64)
   })
 
-  test('larger line height means a smaller font and wider pitch', () => {
-    const tight = layoutText(doc('AB\nCD', { lineHeight: 1 }), spec, measure)
-    const loose = layoutText(doc('AB\nCD', { lineHeight: 2 }), spec, measure)
+  test('the gap is the space between the line boxes, in dots', () => {
+    const tight = layoutText(doc('AB\nCD', { fontSizePx: 20 }), spec, measure)
+    const spaced = layoutText(doc('AB\nCD', { fontSizePx: 20, lineGap: 7 }), spec, measure)
+    expect(pitch(tight)).toBe(ink(20))
+    expect(pitch(spaced)).toBe(ink(20) + 7)
+    expect(spaced.lineGap).toBe(7)
+  })
+
+  test('with an automatic size, a larger gap means a smaller font', () => {
+    const tight = layoutText(doc('AB\nCD'), spec, measure)
+    const loose = layoutText(doc('AB\nCD', { lineGap: 20 }), spec, measure)
     expect(loose.fontSizePx).toBeLessThan(tight.fontSizePx)
-    const pitch = (l: typeof tight) => l.lines[1]!.baseline - l.lines[0]!.baseline
-    const ink = (l: typeof tight) => Math.ceil(l.fontSizePx * 0.7) + Math.ceil(l.fontSizePx * 0.2)
-    expect(pitch(tight)).toBe(ink(tight))
-    expect(pitch(loose)).toBe(2 * ink(loose))
+    expect(pitch(loose)).toBe(ink(loose.fontSizePx) + 20)
+    // Only the tape bounds the gap: two lines of at least one dot each.
+    expect(tight.maxLineGap).toBe(62)
+    expect(layoutText(doc('AB\nCD', { lineGap: 500 }), spec, measure).lineGap).toBe(62)
+  })
+
+  test('with a chosen size, the gap is limited so the size is kept', () => {
+    // 30px: line box 21 + 6 = 27 dots; two of them leave 10 dots between the lines.
+    const layout = layoutText(doc('AB\nCD', { fontSizePx: 30 }), spec, measure)
+    expect(layout.maxLineGap).toBe(10)
+    const atMax = layoutText(doc('AB\nCD', { fontSizePx: 30, lineGap: 10 }), spec, measure)
+    expect(atMax.fontSizePx).toBe(30)
+    expect(atMax.contentHeight).toBe(64)
+    // Beyond the limit (not reachable through the field) the size gives way.
+    expect(
+      layoutText(doc('AB\nCD', { fontSizePx: 30, lineGap: 11 }), spec, measure).fontSizePx,
+    ).toBe(28)
+  })
+
+  test('a negative gap lets lines overlap, by up to half a line box', () => {
+    const overlap = layoutText(doc('AB\nCD', { fontSizePx: 30, lineGap: -5 }), spec, measure)
+    expect(pitch(overlap)).toBe(27 - 5)
+    expect(overlap.minLineGap).toBe(-13)
+    const clamped = layoutText(doc('AB\nCD', { fontSizePx: 30, lineGap: -100 }), spec, measure)
+    expect(clamped.lineGap).toBe(-13)
+    expect(pitch(clamped)).toBe(14)
+    // Automatic size: the size follows the overlap, and the limit follows the size.
+    const auto = layoutText(doc('AB\nCD', { lineGap: -100 }), spec, measure)
+    expect(auto.lineGap).toBe(auto.minLineGap)
+    expect(auto.contentHeight).toBeLessThanOrEqual(64)
   })
 
   test('alignment offsets shorter lines', () => {
@@ -123,12 +191,6 @@ describe('layoutText', () => {
   test('trailing empty lines are ignored', () => {
     expect(splitLines('a\nb\n\n')).toEqual(['a', 'b'])
     expect(splitLines('a\n\nb')).toEqual(['a', '', 'b'])
-  })
-
-  test('line height is clamped', () => {
-    expect(clampLineHeight(0.1)).toBe(LINE_HEIGHT.min)
-    expect(clampLineHeight(10)).toBe(LINE_HEIGHT.max)
-    expect(clampLineHeight(Number.NaN)).toBe(LINE_HEIGHT.default)
   })
 
   test('cssFont escapes quotes in family names', () => {

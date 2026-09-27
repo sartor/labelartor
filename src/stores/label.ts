@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 
 import { usePersistedRef } from '@/composables/usePersistedRef'
 import { DEFAULT_FONT_FAMILY, isBundledFont } from '@/core/fonts'
-import { LINE_HEIGHT, type LabelDocument, type TextAlign } from '@/core/label'
+import { LINE_GAP, type LabelDocument, type TextAlign } from '@/core/label'
 
 /** Where the label in the editor came from, when it was opened from a list. */
 export interface EditingRef {
@@ -18,7 +18,7 @@ export const useLabelStore = defineStore('label', () => {
   const bold = usePersistedRef('label.bold', false)
   const fontSizePx = usePersistedRef<number>('label.fontSizePx', 68)
   const align = usePersistedRef<TextAlign>('label.align', 'center')
-  const lineHeight = usePersistedRef<number>('label.lineHeight', LINE_HEIGHT.default)
+  const lineGap = usePersistedRef<number>('label.lineGap', LINE_GAP.default)
   const lengthMm = usePersistedRef<number>('label.lengthMm', 0)
   const tapeAlign = usePersistedRef<TextAlign>('label.tapeAlign', 'left')
   const editing = ref<EditingRef | null>(null)
@@ -32,7 +32,7 @@ export const useLabelStore = defineStore('label', () => {
     bold: bold.value,
     fontSizePx: fontSizePx.value,
     align: align.value,
-    lineHeight: lineHeight.value,
+    lineGap: lineGap.value,
     lengthMm: lengthMm.value,
     tapeAlign: tapeAlign.value,
   }))
@@ -42,10 +42,9 @@ export const useLabelStore = defineStore('label', () => {
     text.value = doc.text
     fontFamily.value = isBundledFont(doc.fontFamily) ? doc.fontFamily : DEFAULT_FONT_FAMILY
     bold.value = doc.bold
-    // Saved before the setting existed: auto size.
-    fontSizePx.value = doc.fontSizePx ?? 0
+    fontSizePx.value = doc.fontSizePx
     align.value = doc.align
-    lineHeight.value = doc.lineHeight
+    lineGap.value = doc.lineGap
     lengthMm.value = doc.lengthMm
     tapeAlign.value = doc.tapeAlign
     editing.value = from
@@ -61,7 +60,7 @@ export const useLabelStore = defineStore('label', () => {
     bold,
     fontSizePx,
     align,
-    lineHeight,
+    lineGap,
     lengthMm,
     tapeAlign,
     editing,

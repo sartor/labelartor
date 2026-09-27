@@ -195,7 +195,7 @@ function parseDocument(value: unknown, where: string): LabelDocument {
     bold: value.bold === true,
     fontSizePx: number('fontSizePx', 0),
     align: align('align'),
-    lineHeight: number('lineHeight', 1),
+    lineGap: number('lineGap', 0),
     lengthMm: number('lengthMm', 0),
     tapeAlign: align('tapeAlign'),
   }

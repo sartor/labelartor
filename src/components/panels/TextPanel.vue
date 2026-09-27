@@ -13,7 +13,7 @@ import CollapsibleCard from '@/components/ui/CollapsibleCard.vue'
 import NumberField from '@/components/ui/NumberField.vue'
 import { useLabelActions } from '@/composables/useLabelActions'
 import { fontHasBold } from '@/core/fonts'
-import { LINE_HEIGHT, splitLines } from '@/core/label'
+import { LINE_GAP, splitLines } from '@/core/label'
 import { PT_P300BT } from '@/core/printer'
 import {
   IconArrowBackUp,
@@ -108,13 +108,13 @@ const tapeUsedMm = computed(() => render.lengthMm + leadMm.value)
             class="w-auto flex-grow-1"
           />
           <NumberField
-            v-model="label.lineHeight"
+            v-model="label.lineGap"
             :icon="IconLineHeight"
-            label="Line height"
-            :min="LINE_HEIGHT.min"
-            :max="LINE_HEIGHT.max"
-            :step="LINE_HEIGHT.step"
-            title="Line height (distance between lines)"
+            label="Line gap"
+            :min="render.layout?.minLineGap ?? 0"
+            :max="render.layout?.maxLineGap ?? 0"
+            :step="LINE_GAP.step"
+            title="Space between the lines in dots. Negative values let the lines overlap; with a chosen font size it stops where the lines would no longer fit."
             :disabled="!isMultiline"
             class="w-auto flex-grow-1"
           />

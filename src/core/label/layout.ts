@@ -8,7 +8,7 @@
  * fractional positions make identical glyphs rasterise differently.
  */
 
-import { FONT_SIZE, LINE_HEIGHT, type LabelCanvasSpec, type LabelDocument } from './types'
+import { FONT_SIZE, LINE_GAP, type LabelCanvasSpec, type LabelDocument } from './types'
 
 export interface TextMetricsLite {
   width: number
@@ -34,18 +34,37 @@ export interface LaidOutLine {
 export interface TextLayout {
   width: number
   height: number
-  /** Dots the text block spans vertically (all lines, ink to ink). */
+  /** Dots the text block spans vertically (all lines, line box to line box). */
   contentHeight: number
   /** CSS font shorthand used to draw the lines. */
   font: string
   fontSizePx: number
   /** Largest size at which the text fits the height; what "auto" gives. */
   maxFontSizePx: number
+  /** Space between the line boxes actually used, in dots. */
+  lineGap: number
+  /**
+   * The gap's range for this text: lines may overlap by up to half a line
+   * box, and with a chosen font size they must still fit the height. 0..0
+   * for a single line.
+   */
+  minLineGap: number
+  maxLineGap: number
   lines: LaidOutLine[]
 }
 
 const REFERENCE_SIZE = 100
 const FALLBACK_FAMILIES = 'sans-serif'
+
+/**
+ * Glyphs the vertical metrics are taken from: the tallest and deepest common
+ * letters of Latin and Cyrillic. Measuring these instead of the text itself
+ * gives every text the same line box at a given size, so "right" and "left"
+ * get the same size, baseline and line pitch. Letters that reach beyond the
+ * probe (accents, unusual symbols) still widen the box, so nothing is cut.
+ * The font must be loaded for these glyphs too (see `renderDocument`).
+ */
+export const METRICS_PROBE = 'HbdfghjklpqyДЩбруф'
 
 export function cssFont(family: string, sizePx: number, weight: FontWeight = 400): string {
   return `${weight} ${sizePx}px "${family.replace(/"/g, '\\"')}", ${FALLBACK_FAMILIES}`
@@ -56,11 +75,6 @@ export function splitLines(text: string): string[] {
   // Trailing empty lines are usually an in-progress edit; don't shrink for them.
   while (lines.length > 1 && lines[lines.length - 1]!.trim() === '') lines.pop()
   return lines
-}
-
-export function clampLineHeight(value: number): number {
-  if (!Number.isFinite(value)) return LINE_HEIGHT.default
-  return Math.min(LINE_HEIGHT.max, Math.max(LINE_HEIGHT.min, value))
 }
 
 /** Smallest size a document may ask for, given the largest that fits. */
@@ -80,8 +94,9 @@ interface BlockMetrics {
 }
 
 function measureBlock(lines: string[], font: string, measure: MeasureText): BlockMetrics {
-  let ascent = 0
-  let descent = 0
+  const probe = measure(METRICS_PROBE, font)
+  let ascent = probe.ascent
+  let descent = probe.descent
   const widths = lines.map((line) => {
     if (!line.trim()) return 0
     const m = measure(line, font)
@@ -93,13 +108,20 @@ function measureBlock(lines: string[], font: string, measure: MeasureText): Bloc
 }
 
 /** Vertical metrics snapped to whole dots. */
-function snapBlock(m: BlockMetrics, lineCount: number, lineHeight: number) {
+function snapBlock(m: BlockMetrics, lineCount: number, gap: number) {
   const ascent = Math.ceil(m.ascent)
   const descent = Math.ceil(m.descent)
   const ink = ascent + descent
-  const pitch = Math.max(1, Math.round(ink * lineHeight))
+  const pitch = Math.max(1, ink + gap)
   return { ascent, ink, pitch, height: ink + (lineCount - 1) * pitch }
 }
+
+/** Largest gap at which `lineCount` lines of `ink` dots fit the height. */
+const maxGapFor = (ink: number, lineCount: number, heightDots: number) =>
+  Math.floor((heightDots - lineCount * ink) / (lineCount - 1))
+
+/** Lines may overlap by up to half a line box. */
+const minGapFor = (ink: number) => -Math.floor(ink / 2)
 
 const emptyLayout = (spec: LabelCanvasSpec): TextLayout => ({
   width: 0,
@@ -108,6 +130,9 @@ const emptyLayout = (spec: LabelCanvasSpec): TextLayout => ({
   font: '',
   fontSizePx: 0,
   maxFontSizePx: 0,
+  lineGap: 0,
+  minLineGap: 0,
+  maxLineGap: 0,
   lines: [],
 })
 
@@ -117,7 +142,8 @@ export function layoutText(
   measure: MeasureText,
 ): TextLayout {
   const lines = splitLines(doc.text)
-  const lineHeight = clampLineHeight(doc.lineHeight)
+  if (!lines.some((line) => line.trim())) return emptyLayout(spec)
+  const count = lines.length
   const weight: FontWeight = doc.bold ? 700 : 400
   const font = (size: number) => cssFont(doc.fontFamily, size, weight)
 
@@ -125,25 +151,54 @@ export function layoutText(
   const refInk = ref.ascent + ref.descent
   if (refInk <= 0) return emptyLayout(spec)
 
-  // Glyph metrics scale ~linearly with size: estimate, then step down until the
-  // snapped block fits (rounding up ascent/descent can push it over).
-  const refHeight = refInk * (1 + (lines.length - 1) * lineHeight)
-  let size = Math.max(1, Math.floor((REFERENCE_SIZE * spec.heightDots) / refHeight))
-  let block = measureBlock(lines, font(size), measure)
-  let snapped = snapBlock(block, lines.length, lineHeight)
-  while (size > 1 && snapped.height > spec.heightDots) {
-    size--
-    block = measureBlock(lines, font(size), measure)
-    snapped = snapBlock(block, lines.length, lineHeight)
+  /** Largest size at which the lines fit the height with `gap` between them. */
+  const fit = (gap: number) => {
+    // Glyph metrics scale ~linearly with size: estimate, then step down until
+    // the snapped block fits (rounding up ascent/descent can push it over)
+    // and up while a larger size still fits (the estimate can fall short).
+    const room = spec.heightDots - (count - 1) * gap
+    let size = Math.max(1, Math.floor((REFERENCE_SIZE * room) / (count * refInk)))
+    let block = measureBlock(lines, font(size), measure)
+    let snapped = snapBlock(block, count, gap)
+    while (size > 1 && snapped.height > spec.heightDots) {
+      size--
+      block = measureBlock(lines, font(size), measure)
+      snapped = snapBlock(block, count, gap)
+    }
+    for (;;) {
+      const larger = measureBlock(lines, font(size + 1), measure)
+      const largerSnapped = snapBlock(larger, count, gap)
+      if (largerSnapped.height > spec.heightDots) break
+      size++
+      block = larger
+      snapped = largerSnapped
+    }
+    return { size, block, snapped }
   }
-  const maxSize = size
+
+  const multiline = count > 1
+  const wanted = Number.isFinite(doc.lineGap) ? Math.round(doc.lineGap) : LINE_GAP.default
+  // The gap first, within what any size allows; the overlap limit needs the size.
+  let gap = multiline ? Math.min(wanted, maxGapFor(1, count, spec.heightDots)) : 0
+  let fitted = fit(gap)
+  if (multiline && gap < minGapFor(fitted.snapped.ink)) {
+    gap = minGapFor(fitted.snapped.ink)
+    fitted = fit(gap)
+  }
+  const maxSize = fitted.size
+  let { size, block, snapped } = fitted
 
   // A smaller size may be asked for; it can never exceed what fits.
-  if (doc.fontSizePx > 0) {
+  const chosen = doc.fontSizePx > 0
+  if (chosen) {
     size = clampFontSize(doc.fontSizePx, maxSize)
     if (size !== maxSize) {
       block = measureBlock(lines, font(size), measure)
-      snapped = snapBlock(block, lines.length, lineHeight)
+      snapped = snapBlock(block, count, gap)
+    }
+    if (multiline && gap < minGapFor(snapped.ink)) {
+      gap = minGapFor(snapped.ink)
+      snapped = snapBlock(block, count, gap)
     }
   }
 
@@ -169,6 +224,15 @@ export function layoutText(
     font: font(size),
     fontSizePx: size,
     maxFontSizePx: maxSize,
+    lineGap: gap,
+    minLineGap: multiline ? Math.min(gap, minGapFor(snapped.ink)) : 0,
+    // With a chosen size the gap stops where the lines would no longer fit;
+    // with an automatic size the size follows, so only the tape bounds it.
+    maxLineGap: multiline
+      ? chosen
+        ? Math.max(gap, maxGapFor(snapped.ink, count, spec.heightDots))
+        : maxGapFor(1, count, spec.heightDots)
+      : 0,
     lines: laidOut,
   }
 }

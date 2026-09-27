@@ -27,8 +27,9 @@ const shown = computed({
 
 const title = computed(
   () =>
-    `CSS font size (em box) in dots: ${min.value}–${props.max}. At ${props.max} the letters fill ` +
-    'the tape height; fonts with small letters within their em, such as small caps, get large values.',
+    `CSS font size (em box) in dots: ${min.value}–${props.max}. At ${props.max} the tallest and ` +
+    'deepest letters of the font fill the tape height; fonts with small letters within their em, ' +
+    'such as small caps, get large values.',
 )
 </script>
 
