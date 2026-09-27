@@ -1,7 +1,6 @@
 import { ref, watch, type Ref } from 'vue'
 
-/** Prefix for every localStorage key the app owns (index.html reads one key with it too). */
-const STORAGE_PREFIX = 'pt-labels:'
+import { STORAGE_PREFIX } from '@/storage'
 
 function load<T>(key: string, fallback: T): T {
   try {
@@ -12,7 +11,10 @@ function load<T>(key: string, fallback: T): T {
   }
 }
 
-/** A ref mirrored to localStorage (JSON). Storage failures are ignored. */
+/**
+ * A ref mirrored to localStorage (JSON) under the app's prefix. Storage
+ * failures are ignored. The stored shapes are versioned in `@/storage`.
+ */
 export function usePersistedRef<T>(key: string, initial: T): Ref<T> {
   const state = ref(load(key, initial)) as Ref<T>
   watch(
