@@ -1,6 +1,6 @@
-// Tooling config files that run in Node.js / Bun (Vite, ESLint).
+// Tooling config files that run in Node.js / Bun (Vite). The ESLint config is plain JS.
 {
-  "include": ["vite.config.*", "eslint.config.*"],
+  "include": ["vite.config.*"],
   "compilerOptions": {
     "target": "es2024",
     "lib": ["es2024"],
