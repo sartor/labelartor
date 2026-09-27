@@ -1,0 +1,25 @@
+# Logs
+logs
+*.log
+
+node_modules
+dist
+coverage
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea
+*.suo
+*.sw?
+
+*.tsbuildinfo
+.eslintcache
+
+# Vite
+*.timestamp-*-*.mjs
+
+# Claude Code session files
+.claude/

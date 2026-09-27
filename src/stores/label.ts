@@ -1,0 +1,72 @@
+import { defineStore } from 'pinia'
+import { computed, ref } from 'vue'
+
+import { usePersistedRef } from '@/composables/usePersistedRef'
+import { DEFAULT_FONT_FAMILY, isBundledFont } from '@/core/fonts'
+import { LINE_HEIGHT, type LabelDocument, type TextAlign } from '@/core/label'
+
+/** Where the label in the editor came from, when it was opened from a list. */
+export interface EditingRef {
+  source: 'queue' | 'history'
+  id: string
+}
+
+/** The label currently being edited (persisted as a draft). */
+export const useLabelStore = defineStore('label', () => {
+  const text = usePersistedRef('label.text', 'Hello, label!')
+  const fontFamily = usePersistedRef('label.fontFamily', DEFAULT_FONT_FAMILY)
+  const bold = usePersistedRef('label.bold', false)
+  const fontSizePx = usePersistedRef<number>('label.fontSizePx', 0)
+  const align = usePersistedRef<TextAlign>('label.align', 'center')
+  const lineHeight = usePersistedRef<number>('label.lineHeight', LINE_HEIGHT.default)
+  const lengthMm = usePersistedRef<number>('label.lengthMm', 0)
+  const tapeAlign = usePersistedRef<TextAlign>('label.tapeAlign', 'left')
+  const editing = ref<EditingRef | null>(null)
+
+  // A draft may name a font the app no longer ships.
+  if (!isBundledFont(fontFamily.value)) fontFamily.value = DEFAULT_FONT_FAMILY
+
+  const document = computed<LabelDocument>(() => ({
+    text: text.value,
+    fontFamily: fontFamily.value,
+    bold: bold.value,
+    fontSizePx: fontSizePx.value,
+    align: align.value,
+    lineHeight: lineHeight.value,
+    lengthMm: lengthMm.value,
+    tapeAlign: tapeAlign.value,
+  }))
+
+  /** Replaces the draft with `doc`, remembering where it came from. */
+  function load(doc: LabelDocument, from: EditingRef | null = null) {
+    text.value = doc.text
+    fontFamily.value = isBundledFont(doc.fontFamily) ? doc.fontFamily : DEFAULT_FONT_FAMILY
+    bold.value = doc.bold
+    // Saved before the setting existed: auto size.
+    fontSizePx.value = doc.fontSizePx ?? 0
+    align.value = doc.align
+    lineHeight.value = doc.lineHeight
+    lengthMm.value = doc.lengthMm
+    tapeAlign.value = doc.tapeAlign
+    editing.value = from
+  }
+
+  function stopEditing() {
+    editing.value = null
+  }
+
+  return {
+    text,
+    fontFamily,
+    bold,
+    fontSizePx,
+    align,
+    lineHeight,
+    lengthMm,
+    tapeAlign,
+    editing,
+    document,
+    load,
+    stopEditing,
+  }
+})

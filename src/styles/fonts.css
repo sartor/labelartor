@@ -1,0 +1,60 @@
+/*
+ * Bundled label fonts — keep in sync with src/core/fonts/bundled.ts.
+ * Variable fonts carry every weight in one file; static fonts get their
+ * regular file plus the bold (700) one where it exists. Fonts that ship huge
+ * CJK subsets are imported per script so the stylesheet does not carry a
+ * hundred unused @font-face rules.
+ */
+
+/* Sans */
+@import '@fontsource-variable/roboto';
+@import '@fontsource-variable/open-sans';
+@import '@fontsource/pt-sans';
+@import '@fontsource/pt-sans/700.css';
+@import '@fontsource-variable/golos-text';
+@import '@fontsource/didact-gothic';
+@import '@fontsource/russo-one';
+@import '@fontsource/gothic-a1/latin-400.css';
+@import '@fontsource/gothic-a1/latin-ext-400.css';
+@import '@fontsource/gothic-a1/cyrillic-400.css';
+@import '@fontsource/gothic-a1/cyrillic-ext-400.css';
+@import '@fontsource/gothic-a1/latin-700.css';
+@import '@fontsource/gothic-a1/latin-ext-700.css';
+@import '@fontsource/gothic-a1/cyrillic-700.css';
+@import '@fontsource/gothic-a1/cyrillic-ext-700.css';
+@import '@fontsource-variable/science-gothic';
+@import '@fontsource-variable/ysabeau-infant';
+@import '@fontsource/arsenal-sc';
+@import '@fontsource/arsenal-sc/700.css';
+@import '@fontsource-variable/finlandica';
+@import '@fontsource-variable/tektur';
+
+/* Condensed */
+@import '@fontsource-variable/roboto-condensed';
+@import '@fontsource-variable/oswald';
+@import '@fontsource/pt-sans-narrow';
+@import '@fontsource/pt-sans-narrow/700.css';
+@import '@fontsource/fira-sans-condensed';
+@import '@fontsource/fira-sans-condensed/700.css';
+@import '@fontsource-variable/cuprum';
+
+/* Monospace */
+@import '@fontsource-variable/roboto-mono';
+@import '@fontsource/noto-mono';
+@import '@fontsource-variable/lilex';
+@import '@fontsource/iosevka';
+@import '@fontsource/iosevka/700.css';
+@import '@fontsource/ia-writer-mono';
+@import '@fontsource/ia-writer-mono/700.css';
+@import '@fontsource/adwaita-mono';
+@import '@fontsource/adwaita-mono/700.css';
+
+/* Pixel */
+@import '@fontsource/tiny5';
+@import '@fontsource-variable/pixelify-sans';
+@import '@fontsource/press-start-2p';
+@import '@fontsource-variable/handjet';
+@import '@fontsource/dotgothic16/latin.css';
+@import '@fontsource/dotgothic16/latin-ext.css';
+@import '@fontsource/dotgothic16/cyrillic.css';
+@import '@fontsource/unifont';

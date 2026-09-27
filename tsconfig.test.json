@@ -1,0 +1,10 @@
+// Unit tests (bun test). Code they import from src/ is pulled in automatically.
+{
+  "extends": "./tsconfig.app.json",
+  "include": ["env.d.ts", "src/**/__tests__/*"],
+  "exclude": [],
+  "compilerOptions": {
+    "types": ["bun", "w3c-web-serial"],
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.test.tsbuildinfo"
+  }
+}
