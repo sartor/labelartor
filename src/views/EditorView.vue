@@ -19,9 +19,9 @@ const printer = usePrinterStore()
       design labels; use Chrome or Edge to print.
     </div>
 
-    <PreviewPanel id="preview" />
-    <TextPanel id="text" />
     <QueuePanel id="queue" />
+    <TextPanel id="text" />
+    <PreviewPanel id="preview" />
     <ProjectsPanel id="projects" />
     <HistoryPanel id="history" />
   </div>

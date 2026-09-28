@@ -7,7 +7,7 @@ import { useHistoryStore } from '@/stores/history'
 import { usePrinterStore } from '@/stores/printer'
 import { useRasterCacheStore } from '@/stores/rasterCache'
 
-/** Labels waiting to be printed as one batch. */
+/** The labels of the open project, printed as one batch. */
 export const useQueueStore = defineStore('queue', () => {
   const items = usePersistedRef<LabelEntry[]>('queue.items', [])
   /** Set while a batch is being printed. */
@@ -18,6 +18,7 @@ export const useQueueStore = defineStore('queue', () => {
 
   const find = (id: string) => items.value.find((item) => item.id === id)
 
+  /** Adds a label at the end. */
   function add(doc: LabelDocument): LabelEntry {
     const entry = createEntry(doc)
     items.value.push(entry)
@@ -35,22 +36,9 @@ export const useQueueStore = defineStore('queue', () => {
     items.value = items.value.filter((item) => item.id !== id)
   }
 
-  function clear() {
-    items.value = []
-  }
-
-  /** Marks one queued label as done without printing it. */
-  function moveToHistory(id: string): boolean {
-    const entry = find(id)
-    if (!entry) return false
-    useHistoryStore().add(entry.doc)
-    remove(id)
-    return true
-  }
-
   /**
-   * Prints the whole queue back to back. Each label moves to the history as
-   * soon as the printer confirms it, so a failure leaves the rest queued.
+   * Prints every label back to back. The labels stay in the project; each is
+   * copied to the history as soon as the printer confirms it.
    */
   async function printAll(): Promise<boolean> {
     const printer = usePrinterStore()
@@ -73,11 +61,7 @@ export const useQueueStore = defineStore('queue', () => {
         jobs.map((job) => job.raster),
         {
           onJobStart: (index, count) => (printing.value = { index, count }),
-          onJobDone: (index) => {
-            const { entry } = jobs[index]!
-            history.add(entry.doc)
-            remove(entry.id)
-          },
+          onJobDone: (index) => history.add(jobs[index]!.entry.doc),
         },
       )
     } finally {
@@ -94,8 +78,6 @@ export const useQueueStore = defineStore('queue', () => {
     add,
     update,
     remove,
-    clear,
-    moveToHistory,
     printAll,
   }
 })

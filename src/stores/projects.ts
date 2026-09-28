@@ -1,17 +1,22 @@
 import { defineStore } from 'pinia'
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 
 import { usePersistedRef } from '@/composables/usePersistedRef'
-import { copyLabels, createProject, type Project } from '@/core/label'
+import { copyLabels, createEntry, createProject, sameEntries, type Project } from '@/core/label'
 import { PT_P300BT } from '@/core/printer'
+import { DEFAULT_DOCUMENT } from '@/stores/label'
 import { useQueueStore } from '@/stores/queue'
 import { useRasterCacheStore } from '@/stores/rasterCache'
 import { useSettingsStore } from '@/stores/settings'
+import { isoLocalDateTime } from '@/utils/format'
 
-/** Named snapshots of the queue. */
+/**
+ * Named projects. One is always open: its labels are the ones in the
+ * project panel, and every change to them is saved into it at once.
+ */
 export const useProjectsStore = defineStore('projects', () => {
   const items = usePersistedRef<Project[]>('projects.items', [])
-  /** Project the queue was last saved to or loaded from; "Save" writes there. */
+  /** The open project. */
   const currentId = usePersistedRef<string | null>('projects.currentId', null)
 
   const queue = useQueueStore()
@@ -22,7 +27,9 @@ export const useProjectsStore = defineStore('projects', () => {
   const find = (id: string) => items.value.find((project) => project.id === id)
   const current = computed(() => (currentId.value ? (find(currentId.value) ?? null) : null))
 
-  /** Tape the queue needs right now, lead included, once every label is rendered. */
+  const defaultName = () => `Project ${isoLocalDateTime(Date.now())}`
+
+  /** Tape the open labels need right now, lead included, once every label is rendered. */
   async function queueTapeMm(): Promise<number> {
     const renders = await Promise.all(queue.items.map((entry) => cache.ensure(entry.doc)))
     const lead = settings.showTapeLead ? PT_P300BT.unusedLeadMm : 0
@@ -30,31 +37,50 @@ export const useProjectsStore = defineStore('projects', () => {
     return Math.round(total * 10) / 10
   }
 
-  /** Creates a new project from the queue and makes it current. */
-  async function saveAs(name: string): Promise<Project> {
-    const project = createProject(name, copyLabels(queue.items), await queueTapeMm())
-    items.value.unshift(project)
-    currentId.value = project.id
-    return project
-  }
-
-  /** Writes the queue into the current project. False when there is none. */
-  async function save(): Promise<boolean> {
+  /** Writes the open labels into the open project, unless they are already there. */
+  async function persist() {
     const project = current.value
-    if (!project) return false
+    if (!project || sameEntries(queue.items, project.labels)) return
     project.labels = copyLabels(queue.items)
-    project.tapeMm = await queueTapeMm()
     project.savedAt = Date.now()
-    return true
+    const tapeMm = await queueTapeMm()
+    // The project may have been switched while the labels rendered.
+    if (project.id === currentId.value) project.tapeMm = tapeMm
   }
 
-  /** Replaces the queue with the project's labels and makes it current. */
+  /** Replaces the open labels with the project's and makes it the open one. */
   function load(id: string): boolean {
     const project = find(id)
     if (!project) return false
-    queue.items = copyLabels(project.labels)
     currentId.value = id
+    queue.items = copyLabels(project.labels)
     return true
+  }
+
+  /** Creates a project with one default label and opens it. */
+  function create(name = defaultName()): Project {
+    const project = createProject(name, [createEntry({ ...DEFAULT_DOCUMENT })], 0)
+    items.value.unshift(project)
+    load(project.id)
+    void queueTapeMm().then((mm) => (project.tapeMm = mm))
+    return project
+  }
+
+  /**
+   * Makes sure a project is open. Labels already on screen without one (as
+   * left by an older build) become a new project rather than being dropped.
+   */
+  function ensureCurrent() {
+    // Labels on screen win over an older copy in the project (left by a build without autosave).
+    if (current.value) return void persist()
+    if (queue.count) {
+      const project = createProject(defaultName(), copyLabels(queue.items), 0)
+      items.value.unshift(project)
+      currentId.value = project.id
+      void persist()
+    } else {
+      create()
+    }
   }
 
   function rename(id: string, name: string) {
@@ -62,22 +88,25 @@ export const useProjectsStore = defineStore('projects', () => {
     if (project) project.name = name
   }
 
+  /** Deletes a project; deleting the open one opens the most recent other, or a new one. */
   function remove(id: string) {
     items.value = items.value.filter((project) => project.id !== id)
-    if (currentId.value === id) currentId.value = null
+    if (currentId.value !== id) return
+    const next = [...items.value].sort((a, b) => b.savedAt - a.savedAt)[0]
+    if (next) load(next.id)
+    else create()
   }
 
-  /** Forgets which project the queue belongs to; the next Save asks for a name. */
-  function unlink() {
-    currentId.value = null
-  }
-
-  /** Adds a project, replacing an existing one with the same id. */
+  /** Adds a project, replacing one with the same id; the open one is reloaded. */
   function upsert(project: Project) {
     const index = items.value.findIndex((p) => p.id === project.id)
     if (index === -1) items.value.unshift(project)
     else items.value.splice(index, 1, project)
+    if (project.id === currentId.value) load(project.id)
   }
+
+  ensureCurrent()
+  watch(() => queue.items, persist, { deep: true })
 
   return {
     items,
@@ -85,12 +114,10 @@ export const useProjectsStore = defineStore('projects', () => {
     currentId,
     current,
     find,
-    saveAs,
-    save,
     load,
+    create,
     rename,
     remove,
-    unlink,
     upsert,
   }
 })

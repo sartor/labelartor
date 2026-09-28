@@ -66,14 +66,13 @@ watchPostEffect(() => {
       class="d-inline-flex align-top"
       :class="[tapeBg, { 'border shadow-sm': !compact }]"
       :style="{ height: mm(tape.widthMm) }"
-      :title="`${tape.widthMm} mm tape`"
     >
       <div
         v-if="showLead"
         class="tape-lead d-flex flex-shrink-0 align-items-center justify-content-center overflow-hidden"
         :class="{ dark }"
         :style="{ width: mm(PT_P300BT.unusedLeadMm) }"
-        :title="`${PT_P300BT.unusedLeadMm} mm of tape fed before printing starts`"
+        :title="`${PT_P300BT.unusedLeadMm} mm lead`"
       >
         <span class="small text-secondary px-1 text-nowrap" :class="tapeBg">
           {{ PT_P300BT.unusedLeadMm }} mm

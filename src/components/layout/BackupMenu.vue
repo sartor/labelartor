@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/** Export / import of everything (queue, history, projects) as one JSON file. */
+/** Export / import of everything (open project, history, projects) as one JSON file. */
 import { ref } from 'vue'
 
 import AppDropdown from '@/components/ui/AppDropdown.vue'
@@ -20,7 +20,7 @@ async function onFileChosen(event: Event) {
   try {
     const added = await importAll(file)
     window.alert(
-      `Imported ${added.queue} ${added.queue === 1 ? 'label' : 'labels'} into the queue, ` +
+      `Imported ${added.queue} ${added.queue === 1 ? 'label' : 'labels'} into the open project, ` +
         `${added.history} into the history and ${added.projects} ` +
         `${added.projects === 1 ? 'project' : 'projects'}.`,
     )
@@ -32,11 +32,7 @@ async function onFileChosen(event: Event) {
 </script>
 
 <template>
-  <AppDropdown
-    align="end"
-    toggle-class="btn btn-sm btn-outline-secondary"
-    title="Back up or restore the queue, history and projects"
-  >
+  <AppDropdown align="end" toggle-class="btn btn-sm btn-outline-secondary" title="Backup">
     <template #toggle>
       <AppIcon :icon="IconDatabase" />
       <span class="visually-hidden">Backup</span>

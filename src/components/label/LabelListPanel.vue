@@ -1,8 +1,8 @@
 <script setup lang="ts" generic="T extends LabelEntry">
 /**
- * A folding section of saved labels: count and tape total in the header, a
- * "clear" action behind a confirmation, the labels as tiles that flow in
- * rows. Actions for the selected label appear in the header while one is
+ * A folding section of saved labels: count and tape total in the header, an
+ * optional "clear" action behind a confirmation, the labels as tiles that
+ * flow in rows. Actions for the selected label appear in the header while one is
  * selected.
  */
 import { computed } from 'vue'
@@ -21,25 +21,24 @@ const props = withDefaults(
     emptyText: string
     /** Tape counted once on top of the labels, e.g. the lead of a batch. */
     extraMm?: number
+    /** Label of a "clear the list" button (asks first); no button without it. */
     clearLabel?: string
-    clearDisabled?: boolean
     /** Entry currently selected (open in the editor). */
     activeId?: string | null
     /** Extra line for a tile's tooltip, e.g. when it was printed. */
     detail?: (entry: T) => string | undefined
+    /** Show the tape length of the selected label in its group. */
+    selectedLength?: boolean
     /** Extra text shown after the length in the selected-label group. */
     selectedInfo?: (entry: T) => string | undefined
-    /** Appended to the header summary, e.g. the project the queue belongs to. */
-    summaryNote?: string
   }>(),
   {
     extraMm: 0,
-    clearLabel: 'Clear',
-    clearDisabled: false,
+    clearLabel: undefined,
     activeId: null,
     detail: undefined,
+    selectedLength: true,
     selectedInfo: undefined,
-    summaryNote: undefined,
   },
 )
 
@@ -57,9 +56,8 @@ const totalMm = computed(() =>
 
 const summary = computed(() => {
   const n = props.items.length
-  const note = props.summaryNote ? ` · ${props.summaryNote}` : ''
-  if (!n) return `empty${note}`
-  return `${n} ${n === 1 ? 'label' : 'labels'} · ${totalMm.value.toFixed(1)} mm tape${note}`
+  if (!n) return 'empty'
+  return `${n} ${n === 1 ? 'label' : 'labels'} · ${totalMm.value.toFixed(1)} mm tape`
 })
 
 function confirmClear() {
@@ -80,7 +78,7 @@ function confirmClear() {
       >
         <span class="input-group-text">Selected label:</span>
         <slot name="selected-actions" :entry="selected" />
-        <span class="input-group-text" title="Tape length of the selected label">
+        <span v-if="selectedLength" class="input-group-text" title="Tape length">
           {{ cache.get(selected.doc).lengthMm.toFixed(1) }} mm
         </span>
         <span v-if="selectedInfo?.(selected)" class="input-group-text">
@@ -89,9 +87,10 @@ function confirmClear() {
       </div>
       <slot name="actions" />
       <button
+        v-if="clearLabel"
         type="button"
         class="btn btn-sm btn-outline-danger"
-        :disabled="!items.length || clearDisabled"
+        :disabled="!items.length"
         @click="confirmClear"
       >
         <AppIcon :icon="IconTrash" class="me-1" />{{ clearLabel }}

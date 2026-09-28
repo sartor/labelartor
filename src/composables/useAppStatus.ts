@@ -41,14 +41,14 @@ export function useAppStatus() {
       return {
         tone: 'warning',
         text: 'Web Serial unavailable',
-        detail: 'Printing needs Web Serial: use Chrome or Edge on desktop or Android.',
+        detail: 'Use Chrome or Edge to print',
       }
     }
     if (!printer.isConnected) {
       return {
         tone: 'idle',
         text: 'Printer not connected',
-        detail: 'Pair the PT-P300BT in the system Bluetooth settings, then use Connect printer.',
+        detail: 'Pair the printer in Bluetooth settings, then connect',
       }
     }
     const errors = printer.status ? errorMessages(printer.status.errors) : []

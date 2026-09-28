@@ -15,7 +15,7 @@ const id = useId()
 </script>
 
 <template>
-  <span class="d-inline-block" :title="disabled ? 'This font has no bold' : 'Bold'">
+  <span class="d-inline-block" :title="disabled ? 'No bold in this font' : 'Bold'">
     <input
       :id="id"
       v-model="model"

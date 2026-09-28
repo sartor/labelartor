@@ -8,7 +8,7 @@ import { useSettingsStore } from '@/stores/settings'
 const settings = useSettingsStore()
 
 const isDark = computed(() => settings.resolvedColorMode === 'dark')
-const nextLabel = computed(() => (isDark.value ? 'Switch to light theme' : 'Switch to dark theme'))
+const nextLabel = computed(() => (isDark.value ? 'Light theme' : 'Dark theme'))
 </script>
 
 <template>

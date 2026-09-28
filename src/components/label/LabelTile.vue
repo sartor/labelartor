@@ -33,7 +33,6 @@ const tooltip = computed(() => {
     `${font}${props.doc.bold ? ' bold' : ''} · ${lines} ${lines === 1 ? 'line' : 'lines'}`,
     length,
     props.detail,
-    'Click to select and edit',
   ]
     .filter(Boolean)
     .join('\n')

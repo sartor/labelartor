@@ -25,12 +25,7 @@ const shown = computed({
   set: (value: number) => (model.value = value >= props.max ? 0 : value),
 })
 
-const title = computed(
-  () =>
-    `CSS font size (em box) in dots: ${min.value}–${props.max}. At ${props.max} the tallest and ` +
-    'deepest letters of the font fill the tape height; fonts with small letters within their em, ' +
-    'such as small caps, get large values.',
-)
+const title = computed(() => `Font size, dots: ${min.value}–${props.max}`)
 </script>
 
 <template>

@@ -46,9 +46,7 @@ const label = computed(() => {
 const title = computed(
   () =>
     status.value.detail ??
-    (printer.isConnected
-      ? 'Printer status and actions'
-      : 'Pair the PT-P300BT in the system Bluetooth settings first.'),
+    (printer.isConnected ? 'Printer' : 'Pair the printer in Bluetooth settings first'),
 )
 </script>
 

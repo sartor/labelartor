@@ -32,9 +32,9 @@ const KINDS: Record<'text' | 'tape', { name: string; options: SegmentedOption<Te
   tape: {
     name: 'Text position on the tape',
     options: [
-      { value: 'left', label: 'Text at the start of the tape', icon: IconTapeStart },
-      { value: 'center', label: 'Text centered on the tape', icon: IconTapeCenter },
-      { value: 'right', label: 'Text at the end of the tape', icon: IconTapeEnd },
+      { value: 'left', label: 'Text at start', icon: IconTapeStart },
+      { value: 'center', label: 'Text centered', icon: IconTapeCenter },
+      { value: 'right', label: 'Text at end', icon: IconTapeEnd },
     ],
   },
 }

@@ -5,7 +5,7 @@ import { computed, useId } from 'vue'
 import LabelPreview from '@/components/editor/LabelPreview.vue'
 import SegmentedControl, { type SegmentedOption } from '@/components/ui/SegmentedControl.vue'
 import CollapsibleCard from '@/components/ui/CollapsibleCard.vue'
-import { PT_P300BT, TAPES } from '@/core/printer'
+import { PT_P300BT } from '@/core/printer'
 import { useLabelRenderStore } from '@/stores/labelRender'
 import { usePrinterStore } from '@/stores/printer'
 import { useSettingsStore, type PreviewScale } from '@/stores/settings'
@@ -21,11 +21,6 @@ const scaleOptions: SegmentedOption<PreviewScale>[] = [
   { value: 3, label: '3×' },
 ]
 
-/** Tape widths the app supports, widest first. */
-const tapeOptions: SegmentedOption<number>[] = TAPES.filter((tape) => tape.widthMm >= 6)
-  .map((tape) => ({ value: tape.widthMm, label: `${tape.widthMm} mm` }))
-  .reverse()
-
 const tapeUsedMm = computed(
   () => render.lengthMm + (settings.showTapeLead ? PT_P300BT.unusedLeadMm : 0),
 )
@@ -38,35 +33,17 @@ const tapeUsedMm = computed(
         {{ render.lengthMm.toFixed(1) }} mm label
         <template v-if="settings.showTapeLead"> · {{ tapeUsedMm.toFixed(1) }} mm used </template>
         ·
-        <span title="Dots the text block spans / printable dots across the tape">
+        <span title="Text height / tape height, dots">
           fill {{ render.layout.contentHeight }}/{{ printer.tape.printableDots }}
         </span>
         ·
-        <span
-          title="Share of dots the glyph outlines cover fully or not at all. Partly covered dots depend on the threshold and the browser; a pixel font at a multiple of its grid scores 100%."
-        >
+        <span title="Share of cleanly printed dots">
           crisp {{ Math.round(render.sharpness * 100) }}%
         </span>
       </template>
     </template>
     <template #actions>
-      <span
-        class="d-inline-block"
-        title="Tape width the label is designed for. Follows the tape loaded in the printer once it reports one."
-      >
-        <SegmentedControl
-          v-model="settings.tapeWidthMm"
-          :options="tapeOptions"
-          prefix="Tape width"
-          size="sm"
-          aria-label="Tape width"
-        />
-      </span>
-      <div
-        class="input-group input-group-sm w-auto"
-        role="group"
-        :title="`Show the ${PT_P300BT.unusedLeadMm} mm of tape the printer feeds before the label`"
-      >
+      <div class="input-group input-group-sm w-auto" role="group" title="Tape fed before the label">
         <label class="input-group-text" :for="leadId">{{ PT_P300BT.unusedLeadMm }} mm lead</label>
         <!-- Bootstrap's input-group checkbox pattern; form-switch on the addon draws the pill. -->
         <span class="input-group-text form-switch">

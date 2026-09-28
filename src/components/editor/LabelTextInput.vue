@@ -1,28 +1,33 @@
 <script setup lang="ts">
-import { useId } from 'vue'
+import { computed, useId } from 'vue'
 
-defineProps<{ fontFamily?: string; bold?: boolean }>()
+const props = defineProps<{ fontFamily?: string; bold?: boolean }>()
 
 const model = defineModel<string>({ required: true })
 const id = useId()
+
+/** The label's typeface, at a size that shows its shapes clearly. */
+const style = computed(() => ({
+  fontSize: '32px',
+  lineHeight: '40px',
+  ...(props.fontFamily && {
+    fontFamily: `'${props.fontFamily}', sans-serif`,
+    fontWeight: props.bold ? 700 : 400,
+  }),
+}))
 </script>
 
 <template>
-  <div class="d-flex flex-column">
+  <div>
     <label :for="id" class="form-label visually-hidden">Label text</label>
-    <!-- The textarea previews the label font; that is content, not theme styling.
-         It grows to fill whatever height the parent gives the component. -->
+    <!-- The textarea previews the label font; that is content, not theme styling. -->
     <textarea
       :id="id"
       v-model="model"
-      class="form-control form-control-lg flex-grow-1"
-      rows="5"
+      class="form-control form-control-lg"
+      rows="3"
       placeholder="Type the label text. Use Enter for multiple lines."
-      :style="
-        fontFamily
-          ? { fontFamily: `'${fontFamily}', sans-serif`, fontWeight: bold ? 700 : 400 }
-          : undefined
-      "
+      :style="style"
     />
   </div>
 </template>

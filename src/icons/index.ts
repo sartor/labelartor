@@ -16,7 +16,6 @@ export type IconPath = string
 
 // Marks and arrows
 
-export const IconX: IconPath = 'M3 4l1-1 4 4 4-4 1 1-4 4 4 4-1 1-4-4-4 4-1-1 4-4z'
 export const IconChevronDown: IconPath = 'M3 6l1-1 4 4 4-4 1 1-5 5z'
 export const IconChevronRight: IconPath = 'M6 3l1-1 5 5-5 5-1-1 4-4z'
 /** Arrow pointing left with its tail coming down from the right: "back". */
@@ -63,6 +62,8 @@ export const IconTypography: IconPath = 'M6 2h4l4 12h-2l-1-3H5l-1 3H2zM7 5l-1 4h
 
 export const IconPrinter: IconPath = 'M4 1h8v3H4zM1 5h14v7H1zM4 10h8v2H4zM5 11h6v4H5z'
 export const IconTrash: IconPath = 'M6 1h4v2H6zM2 3h12v2H2zM3 6h10v9H3zM6 8h1v5H6zM9 8h1v5H9z'
+/** A folder with a tab: open a project. */
+export const IconFolder: IconPath = 'M1 2h6l2 2h6v10H1zM3 6h10v6H3z'
 export const IconDeviceFloppy: IconPath = 'M1 1h11l3 3v11H1zM4 3v3h7V3zM4 9v4h8V9z'
 export const IconPencil: IconPath = 'M9 3l4 4-6 6-4-4zM3 9l4 4-5 1z'
 /** Lines with a plus: add to the list. */

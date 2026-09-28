@@ -11,11 +11,7 @@ import { useSettingsStore } from '@/stores/settings'
 
 const settings = useSettingsStore()
 
-const title = computed(() =>
-  settings.darkTape
-    ? 'Preview: white text on black tape. Click for black on white.'
-    : 'Preview: black text on white tape. Click for white on black.',
-)
+const title = computed(() => (settings.darkTape ? 'Black on white tape' : 'White on black tape'))
 </script>
 
 <template>

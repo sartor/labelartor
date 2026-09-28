@@ -19,7 +19,7 @@
       target="_blank"
       rel="noopener"
       class="link-secondary d-inline-flex"
-      title="Source code on GitHub"
+      title="Source code"
       aria-label="Source code on GitHub"
     >
       <!-- GitHub mark from Primer Octicons (MIT). -->
