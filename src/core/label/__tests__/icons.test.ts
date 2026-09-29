@@ -30,7 +30,7 @@ describe('label icons', () => {
       expect(icon.categories.length).toBeGreaterThan(0)
       for (const c of icon.categories) expect(known.has(c)).toBe(true)
       expect(icon.source).toMatch(
-        /^((tabler|mdi|iconmind|fluent|wikimedia):[a-z0-9-]+|screenshot)$/,
+        /^((tabler|mdi|iconmind|fluent|wikimedia|lucide|ph|fontisto|la|mingcute|carbon|game-icons|streamline-ultimate|svgrepo):[a-z0-9-]+|qgc:\w+|screenshot)$/,
       )
     }
   })

@@ -114,7 +114,7 @@ async function addBlock(kind: BlockKind) {
           </div>
           <div
             v-else-if="space"
-            class="border rounded d-flex align-items-center p-2 h-100 small text-body-secondary"
+            class="border rounded d-flex align-items-center justify-content-center p-2 h-100 small text-body-secondary"
           >
             {{ space.lengthMm }} mm of blank tape
           </div>

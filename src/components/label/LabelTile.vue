@@ -1,12 +1,12 @@
 <script setup lang="ts">
 /** A saved label at real size in a thin frame; clicking it selects it and opens it. */
-import { computed } from 'vue'
+import { computed, shallowRef, watchEffect } from 'vue'
 
 import LabelPreview from '@/components/editor/LabelPreview.vue'
 import { findBundledFont } from '@/core/fonts'
 import { describeDocument, findLabelIcon, type LabelDocument } from '@/core/label'
 import { usePrinterStore } from '@/stores/printer'
-import { useRasterCacheStore } from '@/stores/rasterCache'
+import { useRasterCacheStore, type CachedRender } from '@/stores/rasterCache'
 import { useSettingsStore } from '@/stores/settings'
 
 const props = defineProps<{
@@ -23,7 +23,15 @@ const printer = usePrinterStore()
 const cache = useRasterCacheStore()
 const settings = useSettingsStore()
 
-const rendered = computed(() => cache.get(props.doc))
+const current = computed(() => cache.get(props.doc))
+/** The last finished render: shown while an edit re-renders, so the tile keeps its size. */
+const finished = shallowRef<CachedRender | null>(null)
+watchEffect(() => {
+  if (current.value.ready) finished.value = current.value
+})
+const rendered = computed(() =>
+  current.value.ready || !finished.value ? current.value : finished.value,
+)
 
 const tooltip = computed(() => {
   const summary = describeDocument(

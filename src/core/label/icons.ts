@@ -4,8 +4,12 @@
  * (MIT), Material Design Icons (Apache 2.0), IconMind (MIT) or Fluent UI
  * System Icons (MIT) icon, the Lesser Coat of Arms of Ukraine from Wikimedia
  * Commons (public domain), or taken from a Brother P-touch app screenshot
- * (`source: 'screenshot'`). Smaller heights are shrunk from the 64-dot dots
- * by `scaleIcon`.
+ * (`source: 'screenshot'`). RC icons also come from Lucide (ISC), Phosphor
+ * (MIT), Fontisto (MIT), Line Awesome, MingCute and Carbon (Apache 2.0),
+ * game-icons.net (CC BY 3.0, by Lorc, Delapouite and contributors), Streamline
+ * (CC BY 4.0, streamlinehq.com), QGroundControl (`qgc:`, Apache 2.0; the elevon
+ * is its flying wing with the elevons cut out) and SVG Repo (`svgrepo:`, CC0).
+ * Smaller heights are shrunk from the 64-dot dots by `scaleIcon`.
  *
  * The PNGs are decoded once at start-up (see labelIconAssets.ts) and handed over
  * with `registerIconDots`. The dots, not the PNGs, are what prints and what
@@ -579,6 +583,55 @@ export const LABEL_ICONS: readonly LabelIcon[] = [
   { id: 'violin', name: 'Violin', categories: ['home'], width: 40, source: 'mdi:violin' },
   { id: 'treble-clef', name: 'Treble clef', categories: ['home'], width: 35, source: 'tabler:clef' },
   { id: 'music-note', name: 'Music note', categories: ['home'], width: 58, source: 'tabler:music' },
+  { id: 'quadcopter', name: 'Quadcopter', categories: ['engineering'], width: 64, source: 'tabler:drone' },
+  { id: 'hexacopter', name: 'Hexacopter', categories: ['engineering'], width: 64, source: 'qgc:HexaRotorX' },
+  { id: 'octocopter', name: 'Octocopter', categories: ['engineering'], width: 64, source: 'qgc:OctoRotorX' },
+  { id: 'flying-wing', name: 'Flying wing', categories: ['engineering'], width: 64, source: 'qgc:FlyingWing' },
+  { id: 'plane-vtail', name: 'V-tail plane', categories: ['engineering'], width: 64, source: 'qgc:PlaneVTail' },
+  { id: 'glider', name: 'Glider', categories: ['engineering'], width: 64, source: 'game-icons:glider' },
+  { id: 'jet', name: 'Jet', categories: ['engineering'], width: 64, source: 'la:fighter-jet' },
+  { id: 'parachute', name: 'Parachute', categories: ['engineering'], width: 64, source: 'tabler:parachute' },
+  { id: 'robot-arm', name: 'Robot arm', categories: ['engineering'], width: 60, source: 'lucide:robot-arm' },
+  { id: 'propeller', name: 'Propeller', categories: ['engineering'], width: 60, source: 'fontisto:propeller-3' },
+  { id: 'motor', name: 'Electric motor', categories: ['engineering'], width: 61, source: 'qgc:MotorComponentIcon' },
+  { id: 'esc', name: 'ESC', categories: ['engineering'], width: 64, source: 'qgc:EscIndicator' },
+  { id: 'engine', name: 'Engine', categories: ['engineering'], width: 64, source: 'tabler:engine' },
+  { id: 'turbine', name: 'Turbine / EDF', categories: ['engineering'], width: 64, source: 'mdi:turbine' },
+  { id: 'gear', name: 'Gear', categories: ['engineering'], width: 64, source: 'tabler:settings' },
+  { id: 'gears', name: 'Gears', categories: ['engineering'], width: 64, source: 'qgc:Gears' },
+  { id: 'wheel', name: 'Wheel', categories: ['engineering'], width: 64, source: 'ph:tire' },
+  { id: 'bearing', name: 'Bearing', categories: ['engineering'], width: 64, source: 'svgrepo:503235-bearing' },
+  { id: 'suspension', name: 'Suspension spring', categories: ['engineering'], width: 28, source: 'tabler:car-suspension' },
+  { id: 'rotate-cw', name: 'Clockwise', categories: ['engineering'], width: 58, source: 'tabler:rotate-clockwise' },
+  { id: 'rotate-ccw', name: 'Counterclockwise', categories: ['engineering'], width: 58, source: 'tabler:rotate' },
+  { id: 'microcontroller', name: 'Microcontroller', categories: ['engineering'], width: 64, source: 'streamline-ultimate:microchip-board' },
+  { id: 'elevon', name: 'Elevon', categories: ['engineering'], width: 64, source: 'qgc:FlyingWing' },
+  { id: 'rudder', name: 'Rudder', categories: ['engineering'], width: 64, source: 'mingcute:rudder-line' },
+  { id: 'uart', name: 'UART', categories: ['engineering'], width: 58, source: 'mdi:swap-horizontal' },
+  { id: 'navigation', name: 'Navigation', categories: ['engineering'], width: 64, source: 'lucide:navigation' },
+  { id: 'battery-low', name: 'Battery low', categories: ['engineering'], width: 58, source: 'tabler:battery-1' },
+  { id: 'battery-half', name: 'Battery half (storage)', categories: ['engineering'], width: 58, source: 'tabler:battery-2' },
+  { id: 'battery-pack', name: 'Battery pack', categories: ['engineering'], width: 64, source: 'mdi:car-battery' },
+  { id: 'charger', name: 'Charger', categories: ['engineering'], width: 64, source: 'carbon:charging-station' },
+  { id: 'bolt', name: 'Lightning bolt', categories: ['engineering'], width: 52, source: 'tabler:bolt' },
+  { id: 'power-button', name: 'Power button', categories: ['engineering'], width: 58, source: 'tabler:power' },
+  { id: 'connector', name: 'Connector', categories: ['engineering'], width: 64, source: 'tabler:plug-connected' },
+  { id: 'fuse', name: 'Fuse', categories: ['engineering'], width: 64, source: 'streamline-ultimate:electronics-fuse' },
+  { id: 'switch', name: 'Switch', categories: ['engineering'], width: 64, source: 'tabler:circuit-switch-open' },
+  { id: 'current-dc', name: 'Direct current', categories: ['engineering'], width: 64, source: 'mdi:current-dc' },
+  { id: 'sine-wave', name: 'Sine wave (AC)', categories: ['engineering'], width: 64, source: 'tabler:wave-sine' },
+  { id: 'square-wave', name: 'Square wave (PWM)', categories: ['engineering'], width: 64, source: 'tabler:wave-square' },
+  { id: 'cable', name: 'Cable', categories: ['engineering'], width: 64, source: 'mdi:cable-data' },
+  { id: 'chip', name: 'Chip / CPU', categories: ['engineering'], width: 64, source: 'tabler:cpu' },
+  { id: 'circuit-board', name: 'Circuit board', categories: ['engineering'], width: 64, source: 'lucide:circuit-board' },
+  { id: 'resistor', name: 'Resistor', categories: ['engineering'], width: 64, source: 'tabler:circuit-resistor' },
+  { id: 'capacitor', name: 'Capacitor', categories: ['engineering'], width: 64, source: 'tabler:circuit-capacitor' },
+  { id: 'diode', name: 'Diode', categories: ['engineering'], width: 64, source: 'tabler:circuit-diode' },
+  { id: 'led', name: 'LED', categories: ['engineering'], width: 58, source: 'mdi:led-on' },
+  { id: 'inductor', name: 'Inductor / coil', categories: ['engineering'], width: 64, source: 'tabler:circuit-inductor' },
+  { id: 'magnet', name: 'Magnet', categories: ['engineering'], width: 58, source: 'tabler:magnet' },
+  { id: 'bluetooth', name: 'Bluetooth', categories: ['engineering'], width: 40, source: 'tabler:bluetooth' },
+  { id: 'serial-port', name: 'Serial port', categories: ['engineering'], width: 64, source: 'fluent:serial-port-24-regular' },
 ]
 
 const byId = new Map(LABEL_ICONS.map((icon) => [icon.id, icon]))
