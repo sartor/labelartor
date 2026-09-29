@@ -1,6 +1,8 @@
-/** A project: a named snapshot of the queue that can be loaded back. */
+/** A project: a named set of labels. */
 
-import { newEntryId, type LabelEntry } from './entries'
+import { cloneDocument } from './blocks'
+import type { LabelEntry } from './entries'
+import { newEntryId } from './ids'
 
 export interface Project {
   id: string
@@ -17,7 +19,7 @@ export function createProject(name: string, labels: LabelEntry[], tapeMm: number
   return { id: newEntryId(), name, createdAt: now, savedAt: now, labels, tapeMm }
 }
 
-/** Deep copy so later edits to the queue do not change the saved project (or vice versa). */
+/** Deep copy so later edits to the open labels do not change the saved project (or vice versa). */
 export function copyLabels(labels: readonly LabelEntry[]): LabelEntry[] {
-  return labels.map((entry) => ({ ...entry, doc: { ...entry.doc } }))
+  return labels.map((entry) => ({ ...entry, doc: cloneDocument(entry.doc) }))
 }

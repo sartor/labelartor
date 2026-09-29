@@ -4,7 +4,7 @@ import { computed } from 'vue'
 
 import LabelPreview from '@/components/editor/LabelPreview.vue'
 import { findBundledFont } from '@/core/fonts'
-import { splitLines, type LabelDocument } from '@/core/label'
+import { describeDocument, findLabelIcon, type LabelDocument } from '@/core/label'
 import { usePrinterStore } from '@/stores/printer'
 import { useRasterCacheStore } from '@/stores/rasterCache'
 import { useSettingsStore } from '@/stores/settings'
@@ -26,16 +26,13 @@ const settings = useSettingsStore()
 const rendered = computed(() => cache.get(props.doc))
 
 const tooltip = computed(() => {
-  const lines = splitLines(props.doc.text).length
-  const font = findBundledFont(props.doc.fontFamily)?.label ?? props.doc.fontFamily
+  const summary = describeDocument(
+    props.doc,
+    (family) => findBundledFont(family)?.label ?? family,
+    (icon) => findLabelIcon(icon)?.name ?? icon,
+  )
   const length = rendered.value.ready ? `${rendered.value.lengthMm.toFixed(1)} mm` : null
-  return [
-    `${font}${props.doc.bold ? ' bold' : ''} · ${lines} ${lines === 1 ? 'line' : 'lines'}`,
-    length,
-    props.detail,
-  ]
-    .filter(Boolean)
-    .join('\n')
+  return [summary, length, props.detail].filter(Boolean).join('\n')
 })
 </script>
 

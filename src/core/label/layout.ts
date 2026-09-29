@@ -8,7 +8,7 @@
  * fractional positions make identical glyphs rasterise differently.
  */
 
-import { FONT_SIZE, LINE_GAP, type LabelCanvasSpec, type LabelDocument } from './types'
+import { FONT_SIZE, LINE_GAP, type LabelCanvasSpec, type TextContent } from './types'
 
 export interface TextMetricsLite {
   width: number
@@ -137,7 +137,7 @@ const emptyLayout = (spec: LabelCanvasSpec): TextLayout => ({
 })
 
 export function layoutText(
-  doc: LabelDocument,
+  doc: TextContent,
   spec: LabelCanvasSpec,
   measure: MeasureText,
 ): TextLayout {

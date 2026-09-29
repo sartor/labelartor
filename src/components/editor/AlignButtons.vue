@@ -1,52 +1,18 @@
 <script setup lang="ts">
-/** Left / centre / right choice, for text lines or for the text's place on the tape. */
-import { computed } from 'vue'
-
+/** Left / centre / right alignment of a text block's lines. */
 import SegmentedControl, { type SegmentedOption } from '@/components/ui/SegmentedControl.vue'
 import type { TextAlign } from '@/core/label'
-import {
-  IconAlignCenter,
-  IconAlignLeft,
-  IconAlignRight,
-  IconTapeCenter,
-  IconTapeEnd,
-  IconTapeStart,
-} from '@/icons'
-
-const props = withDefaults(defineProps<{ kind?: 'text' | 'tape'; disabled?: boolean }>(), {
-  kind: 'text',
-  disabled: false,
-})
+import { IconAlignCenter, IconAlignLeft, IconAlignRight } from '@/icons'
 
 const model = defineModel<TextAlign>({ required: true })
 
-const KINDS: Record<'text' | 'tape', { name: string; options: SegmentedOption<TextAlign>[] }> = {
-  text: {
-    name: 'Text alignment',
-    options: [
-      { value: 'left', label: 'Align left', icon: IconAlignLeft },
-      { value: 'center', label: 'Align center', icon: IconAlignCenter },
-      { value: 'right', label: 'Align right', icon: IconAlignRight },
-    ],
-  },
-  tape: {
-    name: 'Text position on the tape',
-    options: [
-      { value: 'left', label: 'Text at start', icon: IconTapeStart },
-      { value: 'center', label: 'Text centered', icon: IconTapeCenter },
-      { value: 'right', label: 'Text at end', icon: IconTapeEnd },
-    ],
-  },
-}
-
-const kind = computed(() => KINDS[props.kind])
+const options: SegmentedOption<TextAlign>[] = [
+  { value: 'left', label: 'Align left', icon: IconAlignLeft },
+  { value: 'center', label: 'Align center', icon: IconAlignCenter },
+  { value: 'right', label: 'Align right', icon: IconAlignRight },
+]
 </script>
 
 <template>
-  <SegmentedControl
-    v-model="model"
-    :options="kind.options"
-    :disabled="disabled"
-    :aria-label="kind.name"
-  />
+  <SegmentedControl v-model="model" :options="options" aria-label="Text alignment" />
 </template>

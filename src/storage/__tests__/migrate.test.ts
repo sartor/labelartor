@@ -57,14 +57,17 @@ describe('migrateStorage', () => {
 
   test('runs the steps in order from the stored version, treating none as 1', () => {
     const migrations: Record<number, StorageMigration> = {
-      1: (s) => s.set('queue.items', s.get('queue') ?? []),
+      1: (s) => s.set('project.labels', s.get('labels') ?? []),
       2: (s) => s.set('settings.zoom', (s.get<number>('settings.previewScale') ?? 1) * 100),
     }
-    const storage = fakeStorage({ [K('queue')]: '[{"id":"a"}]', [K('settings.previewScale')]: '2' })
+    const storage = fakeStorage({
+      [K('labels')]: '[{"id":"a"}]',
+      [K('settings.previewScale')]: '2',
+    })
     expect(migrateStorage(storage, { version: 3, migrations })).toBe(3)
     expect(storage.dump()).toEqual({
-      [K('queue')]: '[{"id":"a"}]',
-      [K('queue.items')]: '[{"id":"a"}]',
+      [K('labels')]: '[{"id":"a"}]',
+      [K('project.labels')]: '[{"id":"a"}]',
       [K('settings.previewScale')]: '2',
       [K('settings.zoom')]: '200',
       [K('version')]: '3',
@@ -73,14 +76,14 @@ describe('migrateStorage', () => {
     // Already at version 2: only the second step runs.
     const later = fakeStorage({ [K('version')]: '2', [K('settings.previewScale')]: '3' })
     migrateStorage(later, { version: 3, migrations })
-    expect(later.getItem(K('queue.items'))).toBeNull()
+    expect(later.getItem(K('project.labels'))).toBeNull()
     expect(later.getItem(K('settings.zoom'))).toBe('300')
   })
 
   test('leaves state from a newer build alone', () => {
-    const storage = fakeStorage({ [K('version')]: '9', [K('queue.items')]: '[]' })
+    const storage = fakeStorage({ [K('version')]: '9', [K('project.labels')]: '[]' })
     expect(migrateStorage(storage, { version: 2, migrations: { 1: () => {} } })).toBe(9)
-    expect(storage.dump()).toEqual({ [K('version')]: '9', [K('queue.items')]: '[]' })
+    expect(storage.dump()).toEqual({ [K('version')]: '9', [K('project.labels')]: '[]' })
   })
 
   test('treats a broken version value as 1', () => {

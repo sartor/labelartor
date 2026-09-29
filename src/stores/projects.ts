@@ -2,10 +2,18 @@ import { defineStore } from 'pinia'
 import { computed, watch } from 'vue'
 
 import { usePersistedRef } from '@/composables/usePersistedRef'
-import { copyLabels, createEntry, createProject, sameEntries, type Project } from '@/core/label'
+import {
+  copyLabels,
+  createDefaultDocument,
+  createExampleProject,
+  createEntry,
+  createProject,
+  isLabelEntry,
+  sameEntries,
+  type Project,
+} from '@/core/label'
 import { PT_P300BT } from '@/core/printer'
-import { DEFAULT_DOCUMENT } from '@/stores/label'
-import { useQueueStore } from '@/stores/queue'
+import { useProjectStore } from '@/stores/project'
 import { useRasterCacheStore } from '@/stores/rasterCache'
 import { useSettingsStore } from '@/stores/settings'
 import { isoLocalDateTime } from '@/utils/format'
@@ -16,10 +24,14 @@ import { isoLocalDateTime } from '@/utils/format'
  */
 export const useProjectsStore = defineStore('projects', () => {
   const items = usePersistedRef<Project[]>('projects.items', [])
+  // Projects holding labels in an older shape are dropped.
+  items.value = items.value.filter(
+    (project) => Array.isArray(project?.labels) && project.labels.every(isLabelEntry),
+  )
   /** The open project. */
   const currentId = usePersistedRef<string | null>('projects.currentId', null)
 
-  const queue = useQueueStore()
+  const openProject = useProjectStore()
   const cache = useRasterCacheStore()
   const settings = useSettingsStore()
 
@@ -27,11 +39,17 @@ export const useProjectsStore = defineStore('projects', () => {
   const find = (id: string) => items.value.find((project) => project.id === id)
   const current = computed(() => (currentId.value ? (find(currentId.value) ?? null) : null))
 
+  // The open project's labels are stored on their own. When they are missing
+  // (storage cleared), reopen the saved copy instead of saving an empty project over it.
+  if (!openProject.items.length && current.value?.labels.length) {
+    openProject.items = copyLabels(current.value.labels)
+  }
+
   const defaultName = () => `Project ${isoLocalDateTime(Date.now())}`
 
   /** Tape the open labels need right now, lead included, once every label is rendered. */
-  async function queueTapeMm(): Promise<number> {
-    const renders = await Promise.all(queue.items.map((entry) => cache.ensure(entry.doc)))
+  async function openProjectTapeMm(): Promise<number> {
+    const renders = await Promise.all(openProject.items.map((entry) => cache.ensure(entry.doc)))
     const lead = settings.showTapeLead ? PT_P300BT.unusedLeadMm : 0
     const total = renders.reduce((sum, render) => sum + render.lengthMm, lead)
     return Math.round(total * 10) / 10
@@ -40,10 +58,10 @@ export const useProjectsStore = defineStore('projects', () => {
   /** Writes the open labels into the open project, unless they are already there. */
   async function persist() {
     const project = current.value
-    if (!project || sameEntries(queue.items, project.labels)) return
-    project.labels = copyLabels(queue.items)
+    if (!project || sameEntries(openProject.items, project.labels)) return
+    project.labels = copyLabels(openProject.items)
     project.savedAt = Date.now()
-    const tapeMm = await queueTapeMm()
+    const tapeMm = await openProjectTapeMm()
     // The project may have been switched while the labels rendered.
     if (project.id === currentId.value) project.tapeMm = tapeMm
   }
@@ -53,17 +71,24 @@ export const useProjectsStore = defineStore('projects', () => {
     const project = find(id)
     if (!project) return false
     currentId.value = id
-    queue.items = copyLabels(project.labels)
+    openProject.items = copyLabels(project.labels)
     return true
+  }
+
+  /** Adds a new project at the top and opens it. */
+  function start(project: Project): Project {
+    items.value.unshift(project)
+    load(project.id)
+    void openProjectTapeMm().then((mm) => {
+      const added = find(project.id)
+      if (added) added.tapeMm = mm
+    })
+    return project
   }
 
   /** Creates a project with one default label and opens it. */
   function create(name = defaultName()): Project {
-    const project = createProject(name, [createEntry({ ...DEFAULT_DOCUMENT })], 0)
-    items.value.unshift(project)
-    load(project.id)
-    void queueTapeMm().then((mm) => (project.tapeMm = mm))
-    return project
+    return start(createProject(name, [createEntry(createDefaultDocument())], 0))
   }
 
   /**
@@ -73,13 +98,16 @@ export const useProjectsStore = defineStore('projects', () => {
   function ensureCurrent() {
     // Labels on screen win over an older copy in the project (left by a build without autosave).
     if (current.value) return void persist()
-    if (queue.count) {
-      const project = createProject(defaultName(), copyLabels(queue.items), 0)
+    if (openProject.count) {
+      const project = createProject(defaultName(), copyLabels(openProject.items), 0)
       items.value.unshift(project)
       currentId.value = project.id
       void persist()
-    } else {
+    } else if (items.value.length) {
       create()
+    } else {
+      // First visit: an example project shows what labels can hold.
+      start(createExampleProject())
     }
   }
 
@@ -106,7 +134,7 @@ export const useProjectsStore = defineStore('projects', () => {
   }
 
   ensureCurrent()
-  watch(() => queue.items, persist, { deep: true })
+  watch(() => openProject.items, persist, { deep: true })
 
   return {
     items,

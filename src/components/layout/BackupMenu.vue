@@ -20,11 +20,11 @@ async function onFileChosen(event: Event) {
   try {
     const added = await importAll(file)
     window.alert(
-      `Imported ${added.queue} ${added.queue === 1 ? 'label' : 'labels'} into the open project, ` +
+      `Imported ${added.openProject} ${added.openProject === 1 ? 'label' : 'labels'} into the open project, ` +
         `${added.history} into the history and ${added.projects} ` +
         `${added.projects === 1 ? 'project' : 'projects'}.`,
     )
-    editor.scrollTo('queue')
+    editor.scrollTo('project')
   } catch (error) {
     window.alert(error instanceof Error ? error.message : String(error))
   }

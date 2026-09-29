@@ -8,9 +8,9 @@
  * a newer build is left untouched.
  *
  * Version history:
- * 1. Keys `label.*`, `settings.*`, `printer.autoConnect`, `queue.items`,
- *    `history.items` and `projects.items`, each holding one JSON value.
- *    State written before the version key existed is version 1 too.
+ * 1. First version. Keys `label.*`, `settings.*`, `icons.*`,
+ *    `printer.autoConnect`, `project.labels` (the open project),
+ *    `projects.*` and `history.items`, each holding one JSON value.
  *
  * `index.html` reads `settings.colorMode` before the app starts; a
  * migration that renames it must update that script as well.
@@ -38,7 +38,7 @@ export type StorageMigration = (storage: AppStorage) => void
 
 /**
  * Each step upgrades the state from the version it is keyed by to the next
- * one, e.g. `1: (s) => s.set('queue.items', s.get('queue') ?? [])` once
+ * one, e.g. `1: (s) => s.set('project.labels', s.get('labels') ?? [])` once
  * version 2 exists.
  */
 export const STORAGE_MIGRATIONS: Readonly<Record<number, StorageMigration>> = {}

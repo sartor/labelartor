@@ -2,8 +2,8 @@
 import HistoryPanel from '@/components/panels/HistoryPanel.vue'
 import PreviewPanel from '@/components/panels/PreviewPanel.vue'
 import ProjectsPanel from '@/components/panels/ProjectsPanel.vue'
-import QueuePanel from '@/components/panels/QueuePanel.vue'
-import TextPanel from '@/components/panels/TextPanel.vue'
+import ProjectPanel from '@/components/panels/ProjectPanel.vue'
+import ContentPanel from '@/components/panels/ContentPanel.vue'
 import AppIcon from '@/components/ui/AppIcon.vue'
 import { IconAlertTriangle } from '@/icons'
 import { usePrinterStore } from '@/stores/printer'
@@ -19,8 +19,8 @@ const printer = usePrinterStore()
       design labels; use Chrome or Edge to print.
     </div>
 
-    <QueuePanel id="queue" />
-    <TextPanel id="text" />
+    <ProjectPanel id="project" />
+    <ContentPanel id="content" />
     <PreviewPanel id="preview" />
     <ProjectsPanel id="projects" />
     <HistoryPanel id="history" />

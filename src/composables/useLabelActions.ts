@@ -22,16 +22,13 @@ export function useLabelActions() {
 
   const printing = computed(() => printer.activity === 'printing')
 
-  const blockedReason = computed(() => {
-    if (!printer.supported) return 'This browser cannot access serial ports.'
-    if (!printer.isConnected) return 'Connect the printer first.'
-    if (!render.raster) return 'Type some text first.'
-    if (printer.activity === 'status') return 'Reading printer status…'
-    return null
-  })
+  /** Why this label cannot be printed now, or null. */
+  const blockedReason = computed(
+    () => printer.printBlocked ?? (render.raster ? null : 'The label is empty.'),
+  )
 
-  /** One-line note on the label's situation, for the panel header. */
-  const hint = computed(() => blockedReason.value ?? (printed.value ? 'Label printed' : null))
+  /** Note for the panel header once the label has printed. */
+  const note = computed(() => (printed.value ? 'Label printed' : null))
 
   async function printLabel() {
     if (!render.raster) return
@@ -40,5 +37,5 @@ export function useLabelActions() {
     if (printed.value) history.add(label.document)
   }
 
-  return { printing, blockedReason, hint, printLabel }
+  return { printing, blockedReason, note, printLabel }
 }

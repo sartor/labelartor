@@ -25,7 +25,7 @@ const printedAt = (entry: PrintedEntry) => `Printed ${isoLocalDateTime(entry.pri
 function addToProject(entry: PrintedEntry) {
   label.addNew(entry.doc)
   selectedId.value = null
-  editor.scrollTo('queue')
+  editor.scrollTo('project')
 }
 
 function removeSelected(id: string) {

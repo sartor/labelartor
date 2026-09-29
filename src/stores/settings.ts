@@ -2,15 +2,17 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
 import { usePersistedRef } from '@/composables/usePersistedRef'
+import { ICON_CATEGORIES, rememberIconUse, type IconCategory } from '@/core/label'
 import { PT_P300BT } from '@/core/printer'
 
 export type ColorMode = 'auto' | 'light' | 'dark'
 export type PreviewScale = 1 | 2 | 3
+export type IconFilter = 'recent' | 'all' | IconCategory
 
 const DEFAULT_OPEN_PANES = {
   preview: true,
-  text: true,
-  queue: true,
+  content: true,
+  project: true,
   projects: true,
   history: true,
 }
@@ -24,6 +26,16 @@ export const useSettingsStore = defineStore('settings', () => {
   const darkTape = usePersistedRef('settings.darkTape', false)
   /** Tape width labels are designed for; follows the printer's tape once it reports one. */
   const tapeWidthMm = usePersistedRef<number>('settings.tapeWidthMm', PT_P300BT.defaultTape.widthMm)
+  /** When each label icon was last picked, for sorting the picker by recent use. */
+  const iconLastUsed = usePersistedRef<Record<string, number>>('icons.lastUsed', {})
+  /** What the icon picker lists: recently used, all, or one category. */
+  const iconFilter = usePersistedRef<IconFilter>('icons.filter', 'recent')
+  const knownFilters: string[] = ['recent', 'all', ...ICON_CATEGORIES.map((c) => c.id)]
+  if (!knownFilters.includes(iconFilter.value)) iconFilter.value = 'recent'
+  /** Marks an icon as just used; only the 100 most recent are kept. */
+  function markIconUsed(id: string) {
+    iconLastUsed.value = rememberIconUse(iconLastUsed.value, id, Date.now())
+  }
   /** Which panels are expanded. */
   const openPanes = usePersistedRef('settings.openPanes', DEFAULT_OPEN_PANES)
   // Panels added later are open until the user folds them.
@@ -50,5 +62,8 @@ export const useSettingsStore = defineStore('settings', () => {
     darkTape,
     tapeWidthMm,
     openPanes,
+    iconLastUsed,
+    iconFilter,
+    markIconUsed,
   }
 })

@@ -1,6 +1,6 @@
 /**
- * File formats: a full backup (queue, history, projects) and a single
- * project. Plain JSON, validated on import.
+ * File formats: a full backup (the open project, history, projects and
+ * pasted icons) and a single project. Plain JSON, validated on import.
  *
  * Every file names the app, its `kind` and a format `version`. When the
  * shape changes, bump {@link FORMAT_VERSION} and add a step to
@@ -9,14 +9,23 @@
  * app with a clear message instead of a wrong guess.
  *
  * Version history:
- * 1. First public format: `app`, `kind`, `version`, `exportedAt`, then the
- *    content: `queue`, `history` and `projects` in a backup, `project` in a
- *    project file.
+ * 1. First format: `app`, `kind`, `version`, `exportedAt`, then the
+ *    content: `openProject` (its labels), `history`, `projects` and
+ *    `userIcons` in a backup; `project` and the `userIcons` its labels use
+ *    in a project file.
  */
 
 import type { LabelEntry, PrintedEntry } from './entries'
 import type { Project } from './projects'
-import type { LabelDocument, TextAlign } from './types'
+import { type UserIcon, isUserIcon, userIconsUsedBy } from './userIcons'
+import {
+  ICON_SIZES,
+  SPACE_LENGTH,
+  type IconSize,
+  type LabelBlock,
+  type LabelDocument,
+  type TextAlign,
+} from './types'
 
 export const FILE_APP = 'labelartor'
 export const FORMAT_VERSION = 1
@@ -29,14 +38,18 @@ interface FileHeader {
 
 export interface Backup extends FileHeader {
   kind: 'backup'
-  queue: LabelEntry[]
+  /** Labels of the open project. */
+  openProject: LabelEntry[]
   history: PrintedEntry[]
   projects: Project[]
+  userIcons: UserIcon[]
 }
 
 export interface ProjectFile extends FileHeader {
   kind: 'project'
   project: Project
+  /** The user icons the project's labels use. */
+  userIcons: UserIcon[]
 }
 
 export class BackupError extends Error {
@@ -47,7 +60,7 @@ type RawFile = Record<string, unknown>
 
 /**
  * Each step upgrades a file from the version it is keyed by to the next one,
- * e.g. `1: (data) => ({ ...data, labels: data.queue })` once version 2 exists.
+ * e.g. `1: (data) => ({ ...data, userIcons: data.icons })` once version 2 exists.
  */
 const MIGRATIONS: Readonly<Record<number, (data: RawFile) => RawFile>> = {}
 
@@ -60,16 +73,18 @@ function header(): FileHeader {
 }
 
 export function createBackup(
-  queue: readonly LabelEntry[],
+  openProject: readonly LabelEntry[],
   history: readonly PrintedEntry[],
   projects: readonly Project[],
+  userIcons: readonly UserIcon[] = [],
 ): Backup {
   return {
     ...header(),
     kind: 'backup',
-    queue: [...queue],
+    openProject: [...openProject],
     history: [...history],
     projects: [...projects],
+    userIcons: [...userIcons],
   }
 }
 
@@ -85,14 +100,25 @@ export function parseBackup(json: string): Backup {
   return {
     ...parsedHeader(data),
     kind: 'backup',
-    queue: parseEntries(data.queue, 'queue'),
+    openProject: parseEntries(data.openProject, 'open project'),
     history: parsePrintedEntries(data.history),
     projects: parseProjects(data.projects),
+    userIcons: parseUserIcons(data.userIcons),
   }
 }
 
-export function createProjectFile(project: Project): ProjectFile {
-  return { ...header(), kind: 'project', project }
+/** The project, with the user icons its labels use (picked from `userIcons`). */
+export function createProjectFile(
+  project: Project,
+  userIcons: readonly UserIcon[] = [],
+): ProjectFile {
+  const used = userIconsUsedBy(project.labels)
+  return {
+    ...header(),
+    kind: 'project',
+    project,
+    userIcons: userIcons.filter((i) => used.has(i.id)),
+  }
 }
 
 /** `labelartor-project-<name>.json`, with the name reduced to safe characters. */
@@ -104,10 +130,13 @@ export function projectFileName(project: Project): string {
   return `labelartor-project-${slug || project.id}.json`
 }
 
-export function parseProjectFile(json: string): Project {
+export function parseProjectFile(json: string): { project: Project; userIcons: UserIcon[] } {
   const data = upgrade(parseJson(json))
   if (data.kind !== 'project') throw new BackupError('This is not a project file.')
-  return parseProject(data.project, 'project')
+  return {
+    project: parseProject(data.project, 'project'),
+    userIcons: parseUserIcons(data.userIcons),
+  }
 }
 
 /** Appends the incoming entries whose id is not present yet. */
@@ -181,28 +210,59 @@ function stringAt(value: RawFile, key: string, where: string): string {
   return s
 }
 
-function parseDocument(value: unknown, where: string): LabelDocument {
-  if (!isRecord(value) || typeof value.text !== 'string' || typeof value.fontFamily !== 'string') {
-    throw new BackupError(`${where}: not a label.`)
+function parseBlock(value: unknown, where: string): LabelBlock {
+  if (!isRecord(value) || typeof value.id !== 'string' || !value.id) {
+    throw new BackupError(`${where}: not a block.`)
   }
   const align = (key: string): TextAlign =>
     ALIGNS.includes(value[key] as TextAlign) ? (value[key] as TextAlign) : 'left'
   const number = (key: string, fallback: number) =>
     typeof value[key] === 'number' && Number.isFinite(value[key]) ? value[key] : fallback
+  if (value.kind === 'space') {
+    const length = number('lengthMm', SPACE_LENGTH.default)
+    return {
+      kind: 'space',
+      id: value.id,
+      lengthMm: Math.min(SPACE_LENGTH.max, Math.max(SPACE_LENGTH.min, length)),
+    }
+  }
+  if (value.kind === 'icon') {
+    if (typeof value.icon !== 'string') throw new BackupError(`${where}: missing "icon".`)
+    const size = ICON_SIZES.includes(value.size as IconSize)
+      ? (value.size as IconSize)
+      : ICON_SIZES[0]
+    return { kind: 'icon', id: value.id, icon: value.icon, size }
+  }
+  if (
+    value.kind !== 'text' ||
+    typeof value.text !== 'string' ||
+    typeof value.fontFamily !== 'string'
+  ) {
+    throw new BackupError(`${where}: not a block.`)
+  }
   return {
+    kind: 'text',
+    id: value.id,
     text: value.text,
     fontFamily: value.fontFamily,
     bold: value.bold === true,
     fontSizePx: number('fontSizePx', 0),
     align: align('align'),
     lineGap: number('lineGap', 0),
-    lengthMm: number('lengthMm', 0),
-    tapeAlign: align('tapeAlign'),
+  }
+}
+
+function parseDocument(value: unknown, where: string): LabelDocument {
+  if (!isRecord(value) || !Array.isArray(value.blocks) || !value.blocks.length) {
+    throw new BackupError(`${where}: not a label.`)
+  }
+  return {
+    blocks: value.blocks.map((block, i) => parseBlock(block, `${where}, block ${i + 1}`)),
   }
 }
 
 function parseEntries(value: unknown, list: string): LabelEntry[] {
-  if (!Array.isArray(value)) throw new BackupError(`The ${list} list is missing.`)
+  if (!Array.isArray(value)) throw new BackupError(`The ${list} labels are missing.`)
   return value.map((item, i) => {
     const where = `${list} label ${i + 1}`
     if (!isRecord(item)) throw new BackupError(`${where}: not a label.`)
@@ -237,4 +297,13 @@ function parseProject(value: unknown, where: string): Project {
 function parseProjects(value: unknown): Project[] {
   if (!Array.isArray(value)) throw new BackupError('The projects list is missing.')
   return value.map((item, i) => parseProject(item, `project ${i + 1}`))
+}
+
+function parseUserIcons(value: unknown): UserIcon[] {
+  if (value === undefined) return []
+  if (!Array.isArray(value)) throw new BackupError('The user icons list is not a list.')
+  return value.map((item, i) => {
+    if (!isUserIcon(item)) throw new BackupError(`user icon ${i + 1}: not an icon.`)
+    return { id: item.id, name: item.name, width: item.width, dots: item.dots }
+  })
 }

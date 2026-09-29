@@ -1,6 +1,8 @@
-/** Saved labels: queue and history entries wrap a document with identity and time. */
+/** Saved labels: project and history entries wrap a document with identity and time. */
 
-import type { LabelDocument } from './types'
+import { cloneDocument, isLabelDocument } from './blocks'
+import { newEntryId } from './ids'
+import type { LabelBlock, LabelDocument } from './types'
 
 export interface LabelEntry {
   id: string
@@ -12,35 +14,36 @@ export interface PrintedEntry extends LabelEntry {
   printedAt: number
 }
 
-export function newEntryId(): string {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID()
-  }
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
+export function createEntry(doc: LabelDocument): LabelEntry {
+  return { id: newEntryId(), doc: cloneDocument(doc), createdAt: Date.now() }
 }
 
-export function createEntry(doc: LabelDocument): LabelEntry {
-  return { id: newEntryId(), doc: { ...doc }, createdAt: Date.now() }
+/** Whether a stored value is a label in the current shape (anything older is dropped). */
+export function isLabelEntry(value: unknown): value is LabelEntry {
+  return isLabelDocument((value as Partial<LabelEntry> | null)?.doc)
 }
 
 export function createPrintedEntry(doc: LabelDocument): PrintedEntry {
   return { ...createEntry(doc), printedAt: Date.now() }
 }
 
-const DOCUMENT_KEYS: readonly (keyof LabelDocument)[] = [
-  'text',
-  'fontFamily',
-  'bold',
-  'fontSizePx',
-  'align',
-  'lineGap',
-  'lengthMm',
-  'tapeAlign',
-]
+const TEXT_KEYS = ['id', 'text', 'fontFamily', 'bold', 'fontSizePx', 'align', 'lineGap'] as const
+const ICON_KEYS = ['id', 'icon', 'size'] as const
+const SPACE_KEYS = ['id', 'lengthMm'] as const
+
+function sameBlock(a: LabelBlock, b: LabelBlock): boolean {
+  if (a.kind === 'text' && b.kind === 'text') return TEXT_KEYS.every((key) => a[key] === b[key])
+  if (a.kind === 'icon' && b.kind === 'icon') return ICON_KEYS.every((key) => a[key] === b[key])
+  if (a.kind === 'space' && b.kind === 'space') return SPACE_KEYS.every((key) => a[key] === b[key])
+  return false
+}
 
 /** Same label content, whatever order the fields were written in. */
 export function sameDocument(a: LabelDocument, b: LabelDocument): boolean {
-  return DOCUMENT_KEYS.every((key) => a[key] === b[key])
+  return (
+    a.blocks.length === b.blocks.length &&
+    a.blocks.every((block, i) => sameBlock(block, b.blocks[i]!))
+  )
 }
 
 /** Same labels in the same order. */

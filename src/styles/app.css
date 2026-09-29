@@ -1,0 +1,9 @@
+/*
+ * Disabled buttons keep their tooltip, which says why they are disabled.
+ * Bootstrap turns pointer events off on them, so Chromium would show none.
+ */
+.btn:disabled,
+.dropdown-item:disabled {
+  pointer-events: auto;
+  cursor: not-allowed;
+}

@@ -13,17 +13,16 @@ the browser.
 
 ## Features
 
-- Text labels of one or more lines: font, bold (only fonts with a real bold face), size
-  (auto fills the tape), line gap, left / centre / right alignment.
-- 30 bundled fonts in sans, condensed, mono and pixel groups.
-- Preview at real size (1×, 2× or 3×), with crispness score for pixel perfect prints.
-- Print queue: collect labels and print them as one batch.
-- History of printed labels, projects (named snapshots of the queue) and a JSON backup of
-  everything. All of it lives in localStorage
+- Labels built from blocks side by side: text, icons and blank space; drag to reorder.
+- Text of one or more lines in 30 bundled fonts, with bold, size, line gap and alignment.
+- 500+ pixel-perfect icons in categories, plus your own: paste an SVG, PNG or JPEG.
+- Real-size preview with a crispness score.
+- Projects of labels printed as one batch, saved as you edit; history of printed labels.
+- JSON backup and project files. Everything stays in the browser.
 
 ## Requirements
 
-- **Browser:** Chrome, Edge 117+m Firefox 156 (with WebSerial on) on desktop, or Chrome on Android (Web Serial)
+- **Browser:** Chrome or Edge 117+, or Firefox 156+ with Web Serial on, on desktop; Chrome on Android.
 - **Printer:** paired with the computer in the OS Bluetooth settings.
 - **Tooling:** [Bun](https://bun.sh) 1.4+. Vue 3 · Vite · Pinia · [Halfmoon 2](https://www.gethalfmoon.com)
 

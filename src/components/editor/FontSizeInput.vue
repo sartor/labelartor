@@ -25,7 +25,9 @@ const shown = computed({
   set: (value: number) => (model.value = value >= props.max ? 0 : value),
 })
 
-const title = computed(() => `Font size, dots: ${min.value}–${props.max}`)
+const title = computed(() =>
+  props.max ? `Font size, dots: ${min.value}–${props.max}` : 'Font size: type some text first.',
+)
 </script>
 
 <template>

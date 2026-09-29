@@ -53,11 +53,15 @@ const title = computed(
 <template>
   <span class="visually-hidden" role="status" aria-live="polite">{{ status.text }}</span>
 
-  <span v-if="!printer.supported" class="d-inline-block" :title="status.detail">
-    <button type="button" class="btn btn-sm btn-outline-warning" disabled>
-      <AppIcon v-if="tone.icon" :icon="tone.icon" class="me-1" />{{ status.text }}
-    </button>
-  </span>
+  <button
+    v-if="!printer.supported"
+    type="button"
+    class="btn btn-sm btn-outline-warning"
+    :title="status.detail"
+    disabled
+  >
+    <AppIcon v-if="tone.icon" :icon="tone.icon" class="me-1" />{{ status.text }}
+  </button>
 
   <AppDropdown
     v-else-if="printer.isConnected"
@@ -75,6 +79,7 @@ const title = computed(
       <button
         type="button"
         class="dropdown-item"
+        :title="printer.printBlocked ?? undefined"
         :disabled="printer.activity !== 'idle'"
         @click="printer.refreshStatus()"
       >
@@ -93,7 +98,7 @@ const title = computed(
     type="button"
     class="btn btn-sm"
     :class="tone.variant"
-    :title="title"
+    :title="printer.connection === 'connecting' ? 'Connecting to the printer…' : title"
     :disabled="printer.connection === 'connecting'"
     @click="printer.connect()"
   >

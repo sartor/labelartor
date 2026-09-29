@@ -42,6 +42,15 @@ export const usePrinterStore = defineStore('printer', () => {
 
   const isConnected = computed(() => connection.value === 'connected')
   const canPrint = computed(() => isConnected.value && activity.value === 'idle')
+  /** Why nothing can be printed right now (for disabled print buttons), or null. */
+  const printBlocked = computed(() => {
+    if (!supported) return 'This browser cannot access serial ports.'
+    if (connection.value === 'connecting') return 'Connecting to the printer…'
+    if (!isConnected.value) return 'The printer is not connected.'
+    if (activity.value === 'printing') return 'Printing…'
+    if (activity.value === 'status') return 'Reading the printer status…'
+    return null
+  })
   const statusInfo = computed(() => (status.value ? describeStatus(status.value) : null))
   /** Tape labels are designed for: the chosen width, which follows the printer's tape. */
   const tape = computed<TapeSpec>(
@@ -200,6 +209,7 @@ export const usePrinterStore = defineStore('printer', () => {
     lastError,
     isConnected,
     canPrint,
+    printBlocked,
     connect,
     reconnect,
     disconnect,

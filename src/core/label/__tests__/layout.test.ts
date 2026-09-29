@@ -8,7 +8,7 @@ import {
   splitLines,
   type MeasureText,
 } from '../layout'
-import { LINE_GAP, type LabelDocument } from '../types'
+import { LINE_GAP, type TextContent } from '../types'
 
 const fontSize = (font: string) => Number(/(\d+)px/.exec(font)![1])
 
@@ -33,15 +33,13 @@ const measureByLetter: MeasureText = (text, font) => {
 }
 
 const spec = { heightDots: 64, paddingDots: 8 }
-const doc = (text: string, extra: Partial<LabelDocument> = {}): LabelDocument => ({
+const doc = (text: string, extra: Partial<TextContent> = {}): TextContent => ({
   text,
   align: 'left',
   fontFamily: 'Test',
   bold: false,
   fontSizePx: 0,
   lineGap: LINE_GAP.default,
-  lengthMm: 0,
-  tapeAlign: 'left',
   ...extra,
 })
 

@@ -1,8 +1,10 @@
 <script setup lang="ts">
 /**
- * Number input with an icon label. Values typed within the limits apply at
- * once; when the edit is committed the value is clamped and rounded to the
- * step, so a half-typed "0.9" is not clamped at the intermediate "0".
+ * Number input with an icon label, optionally with a slider before it and a
+ * unit after it. Values typed within the limits apply at once; when the edit
+ * is committed the value is clamped and rounded to the step, so a half-typed
+ * "0.9" is not clamped at the intermediate "0". The slider moves in coarser
+ * `sliderStep`s; the box takes any value to `step`.
  */
 import { computed, useId } from 'vue'
 
@@ -17,10 +19,14 @@ const props = withDefaults(
     min: number
     max: number
     step?: number
+    /** Shows a slider moving in these steps. */
+    sliderStep?: number
+    /** Shown after the box, e.g. "mm". */
+    unit?: string
     title?: string
     disabled?: boolean
   }>(),
-  { step: 1, title: undefined, disabled: false },
+  { step: 1, sliderStep: undefined, unit: undefined, title: undefined, disabled: false },
 )
 
 const model = defineModel<number>({ required: true })
@@ -44,16 +50,30 @@ function onChange(event: Event) {
 </script>
 
 <template>
-  <div class="input-group" :title="title">
+  <div class="input-group flex-nowrap" :title="title">
     <label class="input-group-text" :for="id">
       <AppIcon :icon="icon" />
       <span class="visually-hidden">{{ label }}</span>
     </label>
-    <!-- min/max before value: Vue applies attributes in this order. -->
+    <span v-if="sliderStep" class="input-group-text flex-grow-1 bg-body">
+      <!-- min/max before value: Vue applies attributes in this order. -->
+      <input
+        type="range"
+        class="form-range"
+        :min="min"
+        :max="max"
+        :step="sliderStep"
+        :value="model"
+        :disabled="disabled"
+        :aria-label="label"
+        @input="onInput"
+      />
+    </span>
     <input
       :id="id"
       type="number"
       class="form-control"
+      :class="{ 'flex-grow-0 number-beside-slider': sliderStep }"
       :min="min"
       :max="max"
       :step="step"
@@ -62,5 +82,12 @@ function onChange(event: Event) {
       @input="onInput"
       @change="onChange"
     />
+    <span v-if="unit" class="input-group-text">{{ unit }}</span>
   </div>
 </template>
+
+<style scoped>
+.number-beside-slider {
+  width: 6rem;
+}
+</style>

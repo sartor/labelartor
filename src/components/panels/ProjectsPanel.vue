@@ -17,12 +17,13 @@ import {
   IconUpload,
 } from '@/icons'
 import { useProjectsStore } from '@/stores/projects'
-import { useQueueStore } from '@/stores/queue'
+import { useProjectStore } from '@/stores/project'
 import { useSettingsStore } from '@/stores/settings'
+import { WHILE_PRINTING } from '@/utils/messages'
 import { isoLocalDateTime } from '@/utils/format'
 
 const projects = useProjectsStore()
-const queue = useQueueStore()
+const openProject = useProjectStore()
 const settings = useSettingsStore()
 const editor = useOpenInEditor()
 const { exportProject, importProject } = useBackup()
@@ -49,7 +50,7 @@ const summary = computed(() => {
 /** Switches to `project`; nothing is lost, the open one is already saved. */
 function open(project: Project) {
   projects.load(project.id)
-  editor.scrollTo('queue')
+  editor.scrollTo('project')
 }
 
 /** Starts a new project with one label and opens it. */
@@ -57,7 +58,7 @@ function createProject() {
   const name = window.prompt('Project name', `Project ${isoLocalDateTime(Date.now())}`)?.trim()
   if (!name) return
   projects.create(name)
-  editor.scrollTo('queue')
+  editor.scrollTo('project')
 }
 
 function rename(project: Project) {
@@ -98,7 +99,8 @@ async function onFileChosen(event: Event) {
         <button
           type="button"
           class="btn btn-outline-primary"
-          :disabled="queue.isPrinting"
+          :title="openProject.isPrinting ? WHILE_PRINTING : 'Open this project'"
+          :disabled="openProject.isPrinting"
           @click="open(selected)"
         >
           <AppIcon :icon="IconFolder" class="me-1" />Open
@@ -121,7 +123,8 @@ async function onFileChosen(event: Event) {
       <button
         type="button"
         class="btn btn-sm btn-outline-success"
-        :disabled="queue.isPrinting"
+        :title="openProject.isPrinting ? WHILE_PRINTING : 'A new project with one label'"
+        :disabled="openProject.isPrinting"
         @click="createProject"
       >
         <AppIcon :icon="IconPlaylistAdd" class="me-1" />New project
